@@ -21,7 +21,7 @@ class PredictRankings:
         # predict ranking score for each user
         user_emb = self.user_embed[users].reshape(1, self.user_embed.shape[1])
         item_emb = self.item_embed[items]
-        scores = (user_emb @ item_emb.T).flatten()
+        scores = (user_emb @ item_emb.T).flatten() # TODO where is 1 / |U|?
         return scores
 
 

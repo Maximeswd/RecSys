@@ -61,7 +61,7 @@ def train_pointwise(sess: tf.Session, model: PointwiseRecommender, data: str,
     pscore_unlabeled_train = pscore[train[:, 2] == 0]
     num_unlabeled = np.sum(1 - train[:, 2])
     # train the given implicit recommender
-    np.random.seed(12345)
+    np.random.seed(12345) # TODO random seed is not in loop
     for i in np.arange(max_iters):
         # positive mini-batch sampling
         # the same num. of postive and negative samples are used in each batch
