@@ -59,7 +59,6 @@ def train_pointwise(
     data: str,
     train: np.ndarray,
     val: np.ndarray,
-    #pointwise_loss: str,
     test: np.ndarray,
     pscore: np.ndarray,
     max_iters: int = 1000,
@@ -100,9 +99,10 @@ def train_pointwise(
             if ips
             else np.ones(batch_size)
         )
+
         # update user-item latent factors and calculate training loss
         _, train_loss = sess.run(
-            [model.apply_grads, model.unbiased_loss],
+            [model.apply_grads, model.loss],
             feed_dict={
                 model.users: train_batch[:, 0],
                 model.items: train_batch[:, 1],
@@ -116,7 +116,7 @@ def train_pointwise(
     val_batch = np.r_[val, unlabeled_train[unl_idx]]
     pscore_ = np.r_[pscore[val[:, 1].astype(int)], pscore_unlabeled_train[unl_idx]]
     val_loss = sess.run(
-        model.unbiased_loss,
+        model.loss,
         feed_dict={
             model.users: val_batch[:, 0],
             model.items: val_batch[:, 1],
@@ -141,7 +141,6 @@ def train_pointwise(
 
 def train_pairwise(
     sess: tf.Session,
-    #pairwise_loss: str,
     model: PairwiseRecommender,
     data: str,
     train: np.ndarray,

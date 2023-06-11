@@ -91,8 +91,15 @@ class PointwiseRecommender(AbstractRecommender):
     
     def cross_entropy_loss(self):
         """Define the cross-entropy loss function."""
-        pass
-
+        with tf.name_scope('losses'):
+            scores = tf.clip_by_value(self.scores, clip_value_min=self.clip, clip_value_max=1.0) # TODO clip between 0 and 1
+            labels_reshaped = tf.reshape(self.labels, [-1])  # local copy, reshaped to 1D tensor
+            logits_reshaped = tf.reshape(self.logits, [-1])  # ensure logits is also a 1D tensor to match labels
+        
+            self.cross_entropy = tf.losses.sigmoid_cross_entropy(labels_reshaped, logits_reshaped)
+            reg_embeds = tf.nn.l2_loss(self.user_embeddings)
+            reg_embeds += tf.nn.l2_loss(self.item_embeddings)
+            self.loss = self.cross_entropy + self.lam * reg_embeds
 
     def create_losses(self, loss_function) -> None:
         """Create the losses."""
