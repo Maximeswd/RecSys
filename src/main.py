@@ -15,6 +15,8 @@ possible_model_names = ['bpr', 'ubpr', 'wmf', 'expomf', 'relmf']
 parser.add_argument('--model_name', '-m', type=str, required=True, choices=possible_model_names)
 parser.add_argument('--run_sims', '-r', type=int, default=10, required=True)
 parser.add_argument('--data', '-d', type=str, required=True, choices=['coat', 'yahoo'])
+parser.add_argument('--pointwise_loss', type=str, help='Pointwise loss function to use', required=True)
+parser.add_argument('--pairwise_loss', type=str, help='Pairwise loss function to use', required=True)
 
 
 if __name__ == "__main__":
@@ -28,7 +30,9 @@ if __name__ == "__main__":
         batch_size=config['batch_size'],
         max_iters=config['max_iters'],
         eta=config['eta'],
-        model_name=args.model_name
+        model_name=args.model_name,
+        pointwise_loss=args.pointwise_loss,
+        pairwise_loss=args.pairwise_loss
     )
     trainer.run(num_sims=args.run_sims)
 

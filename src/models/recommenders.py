@@ -45,12 +45,13 @@ class PointwiseRecommender(AbstractRecommender):
     eta: float
     weight: float = 1.
     clip: float = 0.
+    loss_function: str = 'paper_loss'
 
     def __post_init__(self,) -> None:
         """Initialize Class."""
         self.create_placeholders()
         self.build_graph()
-        self.create_losses()
+        self.create_losses(self.loss_function)
         self.add_optimizer()
 
     def create_placeholders(self) -> None:
@@ -74,8 +75,7 @@ class PointwiseRecommender(AbstractRecommender):
             self.logits = tf.reduce_sum(tf.multiply(self.u_embed, self.i_embed), 1)
             self.preds = tf.sigmoid(tf.expand_dims(self.logits, 1), name='sigmoid_prediction')
 
-    def create_losses(self) -> None:
-        """Create the losses."""
+    def paper_loss(self):
         with tf.name_scope('losses'):
             # define the unbiased loss for the ideal loss function with binary implicit feedback.
             scores = tf.clip_by_value(self.scores, clip_value_min=self.clip, clip_value_max=1.0) # TODO clip between 0 and 1
@@ -88,6 +88,24 @@ class PointwiseRecommender(AbstractRecommender):
             reg_embeds = tf.nn.l2_loss(self.user_embeddings)
             reg_embeds += tf.nn.l2_loss(self.item_embeddings)
             self.loss = self.unbiased_loss + self.lam * reg_embeds
+    
+    def cross_entropy_loss(self):
+        """Define the cross-entropy loss function."""
+        pass
+
+
+    def create_losses(self, loss_function) -> None:
+        """Create the losses."""
+
+        loss_func_mapping = {
+            'paper_loss': self.paper_loss,
+            'cross_entropy_loss': self.cross_entropy_loss
+        }
+
+        if loss_function in loss_func_mapping:
+            loss_func_mapping[loss_function]()
+        else:
+            raise ValueError(f'Invalid loss function name: {loss_function}')
 
     def add_optimizer(self) -> None:
         """Add the required optimiser to the graph."""
@@ -104,12 +122,13 @@ class PairwiseRecommender(AbstractRecommender):
     lam: float = 1e-4
     eta: float = 0.005
     beta: float = 0.0
+    loss_function: str = 'paper_loss'
 
     def __post_init__(self) -> None:
         """Initialize Class."""
         self.create_placeholders()
         self.build_graph()
-        self.create_losses()
+        self.create_losses(self.loss_function)
         self.add_optimizer()
 
     def create_placeholders(self) -> None:
@@ -138,9 +157,9 @@ class PairwiseRecommender(AbstractRecommender):
             self.preds1 = tf.reduce_sum(tf.multiply(self.u_embed, self.i_p_embed), 1)
             self.preds2 = tf.reduce_sum(tf.multiply(self.u_embed, self.i_embed2), 1)
             self.preds = tf.sigmoid(tf.expand_dims(self.preds1 - self.preds2, 1))
-
-    def create_losses(self) -> None:
-        """Create the losses."""
+    
+    def paper_loss(self):
+        """ The original pairwise loss from the paper """
         with tf.name_scope('losses'):
             # define the naive pairwise loss.
             local_losses = - self.rel1 * (1 - self.rel2) * tf.log(self.preds)
@@ -154,6 +173,24 @@ class PairwiseRecommender(AbstractRecommender):
             reg_embeds = tf.nn.l2_loss(self.user_embeddings)
             reg_embeds += tf.nn.l2_loss(self.item_embeddings)
             self.loss = self.unbiased_loss + self.lam * reg_embeds
+
+    def alternative_loss(self):
+        """ Add custom loss here """
+        pass
+
+    def create_losses(self, loss_function) -> None:
+        """Create the losses."""
+        """Create the losses."""
+        loss_func_mapping = {
+            'paper_loss': self.paper_loss,
+            'alternative_loss': self.alternative_loss
+        }
+
+        if loss_function in loss_func_mapping:
+            loss_func_mapping[loss_function]()
+        else:
+            raise ValueError(f'Invalid loss function name: {loss_function}')
+        
 
     def add_optimizer(self) -> None:
         """Add the required optimiser to the graph."""

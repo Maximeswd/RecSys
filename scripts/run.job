@@ -2,8 +2,10 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=shared
+#SBATCH --partition=fat_soil_shared
 #SBATCH --time=04:00:00
+#SBATCH --output=preprocess_job.out
+#SBATCH --error=test.job.err
 
 module purge
 module load 2021
@@ -12,4 +14,4 @@ module load Anaconda3/2021.05
 cd $HOME/recsys/src
 source activate recsys
 
-srun python tune.py -m ubpr -d coat -r 10
+srun python preprocess_datasets.py -d yahoo

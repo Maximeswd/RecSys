@@ -24,6 +24,7 @@ def train_expomf(
     num_items: int,
     n_components: int = 100,
     lam: float = 1e-6,
+    #pointwise_loss: str
 ) -> Tuple:
     """Train the expomf model."""
 
@@ -58,6 +59,7 @@ def train_pointwise(
     data: str,
     train: np.ndarray,
     val: np.ndarray,
+    #pointwise_loss: str,
     test: np.ndarray,
     pscore: np.ndarray,
     max_iters: int = 1000,
@@ -139,6 +141,7 @@ def train_pointwise(
 
 def train_pairwise(
     sess: tf.Session,
+    #pairwise_loss: str,
     model: PairwiseRecommender,
     data: str,
     train: np.ndarray,
@@ -251,6 +254,8 @@ class Trainer:
     def __init__(
         self,
         data: str,
+        pointwise_loss: str,
+        pairwise_loss: str,
         max_iters: int = 1000,
         batch_size: int = 12,
         eta: float = 0.1,
@@ -258,6 +263,9 @@ class Trainer:
     ) -> None:
         """Initialize class."""
         self.data = data
+        self.pointwise_loss = pointwise_loss
+        self.pairwise_loss = pairwise_loss
+
         if model_name != "expomf":
             hyper_params = yaml.safe_load(open(f"../conf/hyper_params.yaml", "r"))[
                 data
@@ -274,6 +282,7 @@ class Trainer:
 
     def run(self, num_sims: int = 10) -> None:
         """Train implicit recommenders."""
+
         train_point = np.load(f"../data/{self.data}/point/train.npy")
         val_point = np.load(f"../data/{self.data}/point/val.npy")
         test_point = np.load(f"../data/{self.data}/point/test.npy")
@@ -293,7 +302,7 @@ class Trainer:
             cold_user_result_list = list()
             rare_item_result_list = list()
         for seed in np.arange(num_sims):
-            tf.set_random_seed(12345)
+            tf.set_random_seed(12345) # TODO change seed to random 
             ops.reset_default_graph()
             sess = tf.Session()
             if self.model_name in ["ubpr", "bpr"]:
@@ -304,6 +313,7 @@ class Trainer:
                     lam=self.lam,
                     eta=self.eta,
                     beta=self.beta,
+                    loss_function=self.pairwise_loss
                 )
                 u_emb, i_emb, _ = train_pairwise(
                     sess,
@@ -325,6 +335,7 @@ class Trainer:
                     dim=self.dim,
                     lam=self.lam,
                     eta=self.eta,
+                    loss_function=self.pointwise_loss
                 )
                 u_emb, i_emb, _ = train_pointwise(
                     sess,
