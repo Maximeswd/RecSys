@@ -17,7 +17,8 @@ import matplotlib.pyplot as plt
 def transform_rating(ratings: np.ndarray, eps: float = 0.1) -> np.ndarray:
     """Transform ratings into graded relevance information."""
     # ratings = ratings - 1
-    return np.round(eps + (1. - eps) * (2 ** ratings - 1) / (2 ** np.max(ratings) - 1), 1)
+    ratings -= 1
+    return eps + (1. - eps) * (2 ** ratings - 1) / (2 ** np.max(ratings) - 1)
 
 # Define the data
 def mm_est(x, n):
