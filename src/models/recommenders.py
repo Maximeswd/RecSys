@@ -60,6 +60,8 @@ class PointwiseRecommender(AbstractRecommender):
         self.items = tf.placeholder(tf.int32, [None], name='item_ph')
         self.scores = tf.placeholder(tf.float32, [None, 1], name='score_ph')
         self.labels = tf.placeholder(tf.float32, [None, 1], name='label_ph')
+        self.pscores = tf.placeholder(tf.float32, [None, 1], name='pscore_ph')
+        self.nscores = tf.placeholder(tf.float32, [None, 1], name='nscore_ph')
 
     def build_graph(self) -> None:
         """Build the main tensorflow graph with embedding layers."""
@@ -78,9 +80,9 @@ class PointwiseRecommender(AbstractRecommender):
     def paper_loss(self):
         with tf.name_scope('losses'):
             # define the unbiased loss for the ideal loss function with binary implicit feedback.
-            scores = tf.clip_by_value(self.scores, clip_value_min=self.clip, clip_value_max=1.0) # TODO clip between 0 and 1
-            local_losses = (self.labels / scores) * tf.square(1. - self.preds) # TODO self.preds = gamma(u,i) = predicted relevance
-            local_losses += self.weight * (1 - self.labels / scores) * tf.square(self.preds) # TODO why overwrite loss?
+            scores = tf.clip_by_value(self.scores, clip_value_min=self.clip, clip_value_max=1.0) #clip between 0 and 1
+            local_losses = (self.labels / scores) * tf.square(1. - self.preds) 
+            local_losses += self.weight * (1 - self.labels / scores) * tf.square(self.preds)
             local_losses = tf.clip_by_value(local_losses, clip_value_min=-1000, clip_value_max=1000)
             numerator = tf.reduce_sum(self.labels + self.weight * (1 - self.labels))
             self.unbiased_loss = tf.reduce_sum(local_losses) / numerator
@@ -92,7 +94,7 @@ class PointwiseRecommender(AbstractRecommender):
     def cross_entropy_loss(self):
         """Define the cross-entropy loss function."""
         with tf.name_scope('losses'):
-            scores = tf.clip_by_value(self.scores, clip_value_min=self.clip, clip_value_max=1.0) # TODO clip between 0 and 1
+            scores = tf.clip_by_value(self.scores, clip_value_min=self.clip, clip_value_max=1.0) 
             labels_reshaped = tf.reshape(self.labels, [-1])  # local copy, reshaped to 1D tensor
             logits_reshaped = tf.reshape(self.logits, [-1])  # ensure logits is also a 1D tensor to match labels
         
@@ -100,6 +102,24 @@ class PointwiseRecommender(AbstractRecommender):
             reg_embeds = tf.nn.l2_loss(self.user_embeddings)
             reg_embeds += tf.nn.l2_loss(self.item_embeddings)
             self.loss = self.cross_entropy + self.lam * reg_embeds
+    
+    def dual_unbiased_loss(self):
+        """ Define the dual unbiased loss """
+        with tf.name_scope('losses'):
+            pscores = tf.clip_by_value(self.pscores, clip_value_min=self.clip, clip_value_max=1.0) 
+            nscores = tf.clip_by_value(self.nscores, clip_value_min=self.clip, clip_value_max=1.0) 
+
+            local_losses = (self.labels / pscores) *  tf.square(1. - self.preds) 
+            local_losses += self.weight * ((1 - self.labels) / nscores) * tf.square(self.preds) 
+            local_losses = tf.clip_by_value(local_losses, clip_value_min=-1000, clip_value_max=1000)
+
+            numerator = tf.reduce_sum(self.labels + self.weight * (1 - self.labels))
+            self.unbiased_loss = tf.reduce_sum(local_losses) / numerator
+
+            reg_embeds = tf.nn.l2_loss(self.user_embeddings)
+            reg_embeds += tf.nn.l2_loss(self.item_embeddings)
+            self.loss = self.unbiased_loss + self.lam * reg_embeds
+
 
     def create_losses(self, loss_function) -> None:
         """Create the losses."""
@@ -107,7 +127,7 @@ class PointwiseRecommender(AbstractRecommender):
         loss_func_mapping = {
             'paper_loss': self.paper_loss,
             'cross_entropy_loss': self.cross_entropy_loss,
-            'dual_unbiased_loss': self.unbiased_loss
+            'dual_unbiased_loss': self.dual_unbiased_loss
         }
 
         if loss_function in loss_func_mapping:

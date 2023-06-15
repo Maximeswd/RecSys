@@ -36,6 +36,22 @@ if __name__ == "__main__":
     )
     trainer.run(num_sims=args.run_sims)
 
+    # debug variant
+    # warnings.filterwarnings("ignore")
+    # tf.get_logger().setLevel("ERROR")
+    
+    # config = yaml.safe_load(open('recsys/conf/config.yaml', 'rb'))
+    # trainer = Trainer(
+    #     data='yahoo',
+    #     batch_size=config['batch_size'],
+    #     max_iters=config['max_iters'],
+    #     eta=config['eta'],
+    #     model_name='wmf',
+    #     pointwise_loss='dual_unbiased_loss',
+    #     pairwise_loss='paper_loss'
+    # )
+    # trainer.run(num_sims=1)
+
     print('\n', '=' * 25, '\n')
-    print(f'Finished Running {args.model_name}!')
+    print(f'Finished Running !')
     print('\n', '=' * 25, '\n')

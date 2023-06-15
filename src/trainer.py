@@ -24,7 +24,7 @@ def train_expomf(
     num_items: int,
     n_components: int = 100,
     lam: float = 1e-6,
-    #pointwise_loss: str
+    
 ) -> Tuple:
     """Train the expomf model."""
 
@@ -61,10 +61,12 @@ def train_pointwise(
     val: np.ndarray,
     test: np.ndarray,
     pscore: np.ndarray,
+    nscore: np.ndarray,
     max_iters: int = 1000,
     batch_size: int = 256,
     model_name: str = "wmf",
     is_optuna: bool = False,
+    loss = str
 ) -> Tuple:
     """Train and evaluate implicit recommender."""
     train_loss_list = []
@@ -77,21 +79,29 @@ def train_pointwise(
     ips = model_name == "relmf"
     # pscore for train
     pscore = pscore[train[:, 1].astype(int)]
+
+    # nscore for train
+    nscore = nscore[train[:, 1].astype(int)]
+   
     # positive and unlabeled data for training set
     pos_train = train[train[:, 2] == 1]
     pscore_pos_train = pscore[train[:, 2] == 1]
     num_pos = np.sum(train[:, 2])
     unlabeled_train = train[train[:, 2] == 0]
     pscore_unlabeled_train = pscore[train[:, 2] == 0]
+
     num_unlabeled = np.sum(1 - train[:, 2])
+    
     # train the given implicit recommender
     np.random.seed(12345)  # TODO random seed is not in loop
     for i in np.arange(max_iters):
         # positive mini-batch sampling
         # the same num. of postive and negative samples are used in each batch
+        
         sample_size = np.int(batch_size / 2)
         pos_idx = np.random.choice(np.arange(num_pos), size=sample_size)
         unl_idx = np.random.choice(np.arange(num_unlabeled), size=sample_size)
+        
         # mini-batch samples
         train_batch = np.r_[pos_train[pos_idx], unlabeled_train[unl_idx]]
         pscore_ = (
@@ -99,6 +109,13 @@ def train_pointwise(
             if ips
             else np.ones(batch_size)
         )
+
+        nscore_ = (
+            np.r_[pscore_unlabeled_train[unl_idx], pscore_pos_train[pos_idx]]
+            if ips
+            else np.zeros(batch_size)
+        )
+
 
         # update user-item latent factors and calculate training loss
         _, train_loss = sess.run(
@@ -108,13 +125,18 @@ def train_pointwise(
                 model.items: train_batch[:, 1],
                 model.labels: np.expand_dims(train_batch[:, 2], 1),
                 model.scores: np.expand_dims(pscore_, 1),
+                model.pscores: np.expand_dims(pscore_, 1),
+                model.nscores: np.expand_dims(nscore_, 1) 
             },
         )
         train_loss_list.append(train_loss)
+
     # calculate a validation score
     unl_idx = np.random.choice(np.arange(num_unlabeled), size=val.shape[0])
+    pos_idx = np.random.choice(np.arange(num_pos), size=val.shape[0])
     val_batch = np.r_[val, unlabeled_train[unl_idx]]
     pscore_ = np.r_[pscore[val[:, 1].astype(int)], pscore_unlabeled_train[unl_idx]]
+    nscore_ = np.r_[nscore[val[:, 1].astype(int)], pscore[val[:, 1].astype(int)]]
     val_loss = sess.run(
         model.loss,
         feed_dict={
@@ -122,6 +144,8 @@ def train_pointwise(
             model.items: val_batch[:, 1],
             model.labels: np.expand_dims(val_batch[:, 2], 1),
             model.scores: np.expand_dims(pscore_, 1),
+            model.pscores: np.expand_dims(pscore_, 1),
+            model.nscores: np.expand_dims(nscore_, 1) 
         },
     )
 
@@ -286,6 +310,7 @@ class Trainer:
         val_point = np.load(f"../data/{self.data}/point/val.npy")
         test_point = np.load(f"../data/{self.data}/point/test.npy")
         pscore = np.load(f"../data/{self.data}/point/pscore.npy")
+        nscore = np.load(f"../data/{self.data}/point/nscore.npy")
         num_users = np.int(train_point[:, 0].max() + 1)
         num_items = np.int(train_point[:, 1].max() + 1)
         if self.model_name in ["bpr", "ubpr"]:
@@ -344,6 +369,7 @@ class Trainer:
                     val=val_point,
                     test=test_point,
                     pscore=pscore,
+                    nscore=nscore,
                     max_iters=self.max_iters,
                     batch_size=self.batch_size,
                     model_name=self.model_name,

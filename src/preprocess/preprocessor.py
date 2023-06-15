@@ -142,28 +142,29 @@ def preprocess_dataset(data: str):
     unlabeled_data = np.array(list(set(map(tuple, all_data)) - set(map(tuple, train))), dtype=int)
     train = np.r_[np.c_[train, np.ones(train.shape[0])], np.c_[unlabeled_data, np.zeros(unlabeled_data.shape[0])]]
     
-    # estimate propensities and user-item frequencies.
-    if data == 'yahoo':
-        pscore = bayesian_BB(train, num_users, num_items) # num_clicks_user, BB_estimates
-        user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
-        item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
-
-        pscore = (item_freq / item_freq.max()) ** 0.5
-        nscore = (1 - (item_freq / item_freq.max())) ** 0.5
-
-    elif data == 'coat':
-        pscore = bayesian_BB(train, num_users, num_items)
-
     # # estimate propensities and user-item frequencies.
     # if data == 'yahoo':
-    #     user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns len = 15229 (which should be 15400 I would say)
+    #     pscore = bayesian_BB(train, num_users, num_items) # num_clicks_user, BB_estimates
+    #     user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
     #     item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
+
     #     pscore = (item_freq / item_freq.max()) ** 0.5
+    #     nscore = (1 - (item_freq / item_freq.max())) ** 0.5
+
     # elif data == 'coat':
-    #     matrix = sparse.lil_matrix((num_users, num_items))
-    #     for (u, i) in train[:, :2]:
-    #         matrix[u, i] = 1
-    #     pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
+    #     pscore = bayesian_BB(train, num_users, num_items)
+
+    # estimate propensities and user-item frequencies.
+    if data == 'yahoo':
+        user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns len = 15229 (which should be 15400 I would say)
+        item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
+        pscore = (item_freq / item_freq.max()) ** 0.5
+        nscore = (1 - (item_freq / item_freq.max())) ** 0.5
+    elif data == 'coat':
+        matrix = sparse.lil_matrix((num_users, num_items))
+        for (u, i) in train[:, :2]:
+            matrix[u, i] = 1
+        pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
 
     # train-val split using the raw training datasets
     train, val = train_test_split(train, test_size=0.1, random_state=12345)
