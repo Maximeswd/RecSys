@@ -22,6 +22,7 @@ def preprocess_dataset(data: str):
     np.random.seed(12345)
     if data == 'yahoo':
         cols = {0: 'user', 1: 'item', 2: 'rate'}
+
         with codecs.open(f'../data/yahoo/raw/train.txt', 'r', 'utf-8', errors='ignore') as f:
             train_ = pd.read_csv(f, delimiter='\t', header=None)
             train_.rename(columns=cols, inplace=True)
@@ -57,12 +58,18 @@ def preprocess_dataset(data: str):
     if data == 'yahoo':
         user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1]
         item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
+
         pscore = (item_freq / item_freq.max()) ** 0.5
+        nscore = (1 - (item_freq / item_freq.max())) ** 0.5
+
     elif data == 'coat':
         matrix = sparse.lil_matrix((num_users, num_items))
         for (u, i) in train[:, :2]:
             matrix[u, i] = 1
+        
+        nscore = np.clip(1 - np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
         pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
+
     # train-val split using the raw training datasets
     train, val = train_test_split(train, test_size=0.1, random_state=12345)
     # save preprocessed datasets
@@ -74,6 +81,7 @@ def preprocess_dataset(data: str):
     np.save(file=path_data / 'point/val.npy', arr=val.astype(np.int))
     np.save(file=path_data / 'point/test.npy', arr=test)
     np.save(file=path_data / 'point/pscore.npy', arr=pscore)
+    np.save(file=path_data / 'point/nscore.npy', arr=nscore)
     if data == 'yahoo':
         np.save(file=path_data / 'point/user_freq.npy', arr=user_freq)
         np.save(file=path_data / 'point/item_freq.npy', arr=item_freq)
@@ -84,12 +92,20 @@ def preprocess_dataset(data: str):
     bpr_val = _bpr(data=val, n_samples=samples)
     ubpr_val = _ubpr(data=val, pscore=pscore, n_samples=samples)
     pair_test = _bpr_test(data=test, n_samples=samples)
+
+    # New model 
+    dulp_train = _dul(data=train, n_samples=samples, pscore=pscore, nscore=nscore)
+    dulp_val = _dul(data=val, n_samples=samples, pscore=pscore, nscore=nscore) 
+
     np.save(file=path_data / 'pair/bpr_train.npy', arr=bpr_train)
     np.save(file=path_data / 'pair/ubpr_train.npy', arr=ubpr_train)
     np.save(file=path_data / 'pair/bpr_val.npy', arr=bpr_val)
     np.save(file=path_data / 'pair/ubpr_val.npy', arr=ubpr_val)
     np.save(file=path_data / 'pair/test.npy', arr=pair_test)
 
+    # Save new model
+    np.save(file=path_data / 'pair/dbpr_train.npy', arr=dulp_train)
+    np.save(file=path_data / 'pair/dbpr_val.npy', arr=dulp_val)
 
 def _bpr(data: np.ndarray, n_samples: int) -> np.ndarray:
     """Generate training data for the naive bpr."""
@@ -127,3 +143,30 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
     ret = ret[ret["item_x"] != ret["item_y"]]
 
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
+
+def _dul(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
+    """Generate training data for the dual unbiased learning."""
+    data = np.c_[data, pscore[data[:, 1].astype(int)]]
+    data = np.c[data, nscore[data[:, 1].astype(int)]]
+
+    df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
+    positive = df.query("click == 1")
+    #negative = df.query("click == 0")
+
+    ret = positive.merge(df, on="user")\
+        .sample(frac=1, random_state=12345)\
+        .groupby(["user", "item_x"])\
+        .head(n_samples)
+    ret = ret[ret["item_x"] != ret["item_y"]]
+
+    return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_p_x', 'theta_p_y', 'theta_n_x', 'theta_n_x']].values
+
+
+if __name__ == "__main__":
+    
+    data = 'yahoo'
+    preprocess_dataset(data=data)
+
+    print('\n', '=' * 25, '\n')
+    print(f'Finished Preprocessing {data}!')
+    print('\n', '=' * 25, '\n')

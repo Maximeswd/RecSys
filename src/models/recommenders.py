@@ -106,7 +106,8 @@ class PointwiseRecommender(AbstractRecommender):
 
         loss_func_mapping = {
             'paper_loss': self.paper_loss,
-            'cross_entropy_loss': self.cross_entropy_loss
+            'cross_entropy_loss': self.cross_entropy_loss,
+            'dual_unbiased_loss': self.unbiased_loss
         }
 
         if loss_function in loss_func_mapping:
