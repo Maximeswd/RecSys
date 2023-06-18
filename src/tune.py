@@ -12,7 +12,7 @@ import tensorflow as tf
 from tuner import Tuner
 
 parser = argparse.ArgumentParser()
-possible_model_names = ["bpr", "ubpr", "wmf", "expomf", "relmf"]
+possible_model_names = ["bpr", "ubpr", "wmf", "expomf", "relmf", "dubpr"]
 parser.add_argument(
     "--model_name", "-m", type=str, required=True, choices=possible_model_names
 )
