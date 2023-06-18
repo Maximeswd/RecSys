@@ -11,7 +11,7 @@ import pandas as pd
 from scipy import sparse
 from sklearn.model_selection import train_test_split
 from scipy.stats import beta, binom
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 
 def transform_rating(ratings: np.ndarray, eps: float = 0.1) -> np.ndarray:
@@ -160,11 +160,13 @@ def preprocess_dataset(data: str):
         item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
         pscore = (item_freq / item_freq.max()) ** 0.5
         nscore = (1 - (item_freq / item_freq.max())) ** 0.5
+
     elif data == 'coat':
         matrix = sparse.lil_matrix((num_users, num_items))
         for (u, i) in train[:, :2]:
             matrix[u, i] = 1
         pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
+        nscore = np.clip(1 - np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
 
     # train-val split using the raw training datasets
     train, val = train_test_split(train, test_size=0.1, random_state=12345)
@@ -190,8 +192,8 @@ def preprocess_dataset(data: str):
     pair_test = _bpr_test(data=test, n_samples=samples)
 
     # New model 
-    dulp_train = _dul(data=train, n_samples=samples, pscore=pscore, nscore=nscore)
-    dulp_val = _dul(data=val, n_samples=samples, pscore=pscore, nscore=nscore) 
+    dubpr_train = _dubpr(data=train, n_samples=samples, pscore=pscore, nscore=nscore)
+    dubpr_val = _dubpr(data=val, n_samples=samples, pscore=pscore, nscore=nscore) 
 
     np.save(file=path_data / 'pair/bpr_train.npy', arr=bpr_train)
     np.save(file=path_data / 'pair/ubpr_train.npy', arr=ubpr_train)
@@ -200,8 +202,8 @@ def preprocess_dataset(data: str):
     np.save(file=path_data / 'pair/test.npy', arr=pair_test)
 
     # Save new model
-    np.save(file=path_data / 'pair/dbpr_train.npy', arr=dulp_train)
-    np.save(file=path_data / 'pair/dbpr_val.npy', arr=dulp_val)
+    np.save(file=path_data / 'pair/dubpr_train.npy', arr=dubpr_train)
+    np.save(file=path_data / 'pair/dubpr_val.npy', arr=dubpr_val)
 
 def _bpr(data: np.ndarray, n_samples: int) -> np.ndarray:
     """Generate training data for the naive bpr."""
@@ -240,11 +242,9 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
 
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
 
-def _dul(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
+def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
     """Generate training data for the dual unbiased learning."""
-    data = np.c_[data, pscore[data[:, 1].astype(int)]]
-    data = np.c[data, nscore[data[:, 1].astype(int)]]
-
+    data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
     df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
     positive = df.query("click == 1")
     #negative = df.query("click == 0")

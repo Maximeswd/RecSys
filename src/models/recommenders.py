@@ -204,24 +204,25 @@ class PairwiseRecommender(AbstractRecommender):
 
     def dual_unbiased_loss(self):
         """ """
-        local_losses = - self.rel1 * (1 - self.rel2) * tf.log(self.preds)
-        self.ideal_loss = tf.reduce_sum(local_losses) / tf.reduce_sum(self.rel1 * (1 - self.rel2))
-        # define the unbiased pairwise loss.
-        local_losses = - (1 / self.scores1) * ((1 - self.labels2) / self.scores2) * tf.log(self.preds)
-        # non-negative
-        local_losses = tf.clip_by_value(local_losses, clip_value_min=-self.beta, clip_value_max=10e5)
-        self.unbiased_loss = tf.reduce_mean(local_losses)
+        with tf.name_scope('losses'):
+            local_losses = - self.rel1 * (1 - self.rel2) * tf.log(self.preds)
+            self.ideal_loss = tf.reduce_sum(local_losses) / tf.reduce_sum(self.rel1 * (1 - self.rel2))
+            # define the unbiased pairwise loss.
+            local_losses = - (1 / self.scores1) * ((1 - self.labels2) / self.scores2) * tf.log(self.preds)
+            # non-negative
+            local_losses = tf.clip_by_value(local_losses, clip_value_min=-self.beta, clip_value_max=10e5)
+            self.unbiased_loss = tf.reduce_mean(local_losses)
 
-        reg_embeds = tf.nn.l2_loss(self.user_embeddings)
-        reg_embeds += tf.nn.l2_loss(self.item_embeddings)
-        self.loss = self.unbiased_loss + self.lam * reg_embeds
+            reg_embeds = tf.nn.l2_loss(self.user_embeddings)
+            reg_embeds += tf.nn.l2_loss(self.item_embeddings)
+            self.loss = self.unbiased_loss + self.lam * reg_embeds
 
     def create_losses(self, loss_function) -> None:
         """Create the losses."""
         """Create the losses."""
         loss_func_mapping = {
             'paper_loss': self.paper_loss,
-            'alternative_loss': self.alternative_loss
+            'dual_unbiased_loss': self.dual_unbiased_loss
         }
 
         if loss_function in loss_func_mapping:

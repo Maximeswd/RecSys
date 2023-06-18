@@ -4,6 +4,8 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=shared
 #SBATCH --time=01:00:00
+#SBATCH --output=env_job.out
+#SBATCH --error=env.job.err
 
 module purge
 module load 2021

@@ -214,6 +214,21 @@ def train_pairwise(
                     model.scores2: np.expand_dims(train_batch[:, 5], 1),
                 },
             )
+        
+        elif "dubpr" in model.name:
+            _, loss = sess.run(
+            [model.apply_grads, model.loss],
+                feed_dict={
+                    model.users: train_batch[:, 0],
+                    model.pos_items: train_batch[:, 1],
+                    model.scores1_p: np.expand_dims(train_batch[:, 4], 1),
+                    model.scores1_n: np.expand_dims(train_batch[:, 4], 1),
+                    model.items2: train_batch[:, 2],
+                    model.labels2: np.expand_dims(train_batch[:, 3], 1),
+                    model.scores2_p: np.expand_dims(train_batch[:, 5], 1),
+                    model.scores2_n: np.expand_dims(train_batch[:, 5], 1),
+                },
+            )
         train_loss_list.append(loss)
         # calculate a test loss
         test_loss = sess.run(
@@ -250,6 +265,20 @@ def train_pairwise(
                 model.items2: val[:, 2],
                 model.labels2: np.expand_dims(val[:, 3], 1),
                 model.scores2: np.expand_dims(val[:, 5], 1),
+            },
+        )
+    elif "dubpr" in model_name:
+        val_loss = sess.run(
+            model.unbiased_loss,
+            feed_dict={
+                model.users: val[:, 0],
+                model.pos_items: val[:, 1],
+                model.scores1_p: np.expand_dims(val[:, 4], 1),
+                model.scores1_n: np.expand_dims(val[:, 4], 1),
+                model.items2: val[:, 2],
+                model.labels2: np.expand_dims(val[:, 3], 1),
+                model.scores2_p: np.expand_dims(val[:, 5], 1),
+                model.scores2_n: np.expand_dims(val[:, 5], 1),
             },
         )
 

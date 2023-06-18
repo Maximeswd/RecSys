@@ -1,0 +1,35 @@
+WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:69: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2023-06-18 15:03:59.520064: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
+2023-06-18 15:03:59.543814: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
+2023-06-18 15:03:59.544273: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x5590bbbd1cf0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2023-06-18 15:03:59.544306: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:69: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2023-06-18 15:08:41.200733: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
+2023-06-18 15:08:41.223815: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
+2023-06-18 15:08:41.224272: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x56216a6c3900 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2023-06-18 15:08:41.224307: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:69: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2023-06-18 15:36:24.086485: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
+2023-06-18 15:36:24.111790: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
+2023-06-18 15:36:24.112274: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x561a3c7cc1e0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2023-06-18 15:36:24.112307: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:69: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+Traceback (most recent call last):
+  File "main.py", line 37, in <module>
+    trainer.run(num_sims=args.run_sims)
+  File "/home/lcur2441/recsys/src/trainer.py", line 346, in run
+    train = np.load(f"../data/{self.data}/pair/{self.model_name}_train.npy")
+  File "/home/lcur2441/.conda/envs/recsys/lib/python3.7/site-packages/numpy/lib/npyio.py", line 428, in load
+    fid = open(os_fspath(file), "rb")
+FileNotFoundError: [Errno 2] No such file or directory: '../data/yahoo/pair/bpr_train.npy'
+Traceback (most recent call last):
+  File "run.py", line 14, in <module>
+    subprocess.run(cmd, shell=True, check=True)
+  File "/home/lcur2441/.conda/envs/recsys/lib/python3.7/subprocess.py", line 512, in run
+    output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command 'python main.py -m bpr -d yahoo -r 10 --pointwise_loss dual_unbiased_loss --pairwise_loss paper_loss' returned non-zero exit status 1.
+srun: error: r38n3: task 0: Exited with exit code 1
