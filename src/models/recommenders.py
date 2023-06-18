@@ -109,8 +109,8 @@ class PointwiseRecommender(AbstractRecommender):
             pscores = tf.clip_by_value(self.pscores, clip_value_min=self.clip, clip_value_max=1.0) 
             nscores = tf.clip_by_value(self.nscores, clip_value_min=self.clip, clip_value_max=1.0) 
 
-            local_losses = (self.labels / pscores) *  tf.square(1. - self.preds) 
-            local_losses += self.weight * ((1 - self.labels) / nscores) * tf.square(self.preds) 
+            local_losses = (self.labels / pscores) *  tf.log(1. - self.preds) 
+            local_losses += self.weight * ((1 - self.labels) / nscores) * tf.log(self.preds) 
             local_losses = tf.clip_by_value(local_losses, clip_value_min=-1000, clip_value_max=1000)
 
             numerator = tf.reduce_sum(self.labels + self.weight * (1 - self.labels))
@@ -202,9 +202,19 @@ class PairwiseRecommender(AbstractRecommender):
             reg_embeds += tf.nn.l2_loss(self.item_embeddings)
             self.loss = self.unbiased_loss + self.lam * reg_embeds
 
-    def alternative_loss(self):
-        """ Add custom loss here """
-        pass
+    def dual_unbiased_loss(self):
+        """ """
+        local_losses = - self.rel1 * (1 - self.rel2) * tf.log(self.preds)
+        self.ideal_loss = tf.reduce_sum(local_losses) / tf.reduce_sum(self.rel1 * (1 - self.rel2))
+        # define the unbiased pairwise loss.
+        local_losses = - (1 / self.scores1) * ((1 - self.labels2) / self.scores2) * tf.log(self.preds)
+        # non-negative
+        local_losses = tf.clip_by_value(local_losses, clip_value_min=-self.beta, clip_value_max=10e5)
+        self.unbiased_loss = tf.reduce_mean(local_losses)
+
+        reg_embeds = tf.nn.l2_loss(self.user_embeddings)
+        reg_embeds += tf.nn.l2_loss(self.item_embeddings)
+        self.loss = self.unbiased_loss + self.lam * reg_embeds
 
     def create_losses(self, loss_function) -> None:
         """Create the losses."""
