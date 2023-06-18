@@ -342,7 +342,7 @@ class Trainer:
         nscore = np.load(f"../data/{self.data}/point/nscore.npy")
         num_users = np.int(train_point[:, 0].max() + 1)
         num_items = np.int(train_point[:, 1].max() + 1)
-        if self.model_name in ["bpr", "ubpr"]:
+        if self.model_name in ["bpr", "ubpr", "dubpr"]:
             train = np.load(f"../data/{self.data}/pair/{self.model_name}_train.npy")
             val = np.load(f"../data/{self.data}/pair/{self.model_name}_val.npy")
             test = np.load(f"../data/{self.data}/pair/test.npy")
@@ -358,7 +358,7 @@ class Trainer:
             tf.set_random_seed(12345) # TODO change seed to random 
             ops.reset_default_graph()
             sess = tf.Session()
-            if self.model_name in ["ubpr", "bpr"]:
+            if self.model_name in ["ubpr", "bpr", "dubpr"]:
                 pair_rec = PairwiseRecommender(
                     num_users=num_users,
                     num_items=num_items,
