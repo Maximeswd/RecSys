@@ -202,7 +202,7 @@ def train_pairwise(
                     model.scores2: np.ones((batch_size, 1)),
                 },
             )
-        elif "ubpr" in model_name:
+        elif model_name in "ubpr":
             _, loss = sess.run(
                 [model.apply_grads, model.loss],
                 feed_dict={
@@ -215,18 +215,18 @@ def train_pairwise(
                 },
             )
         
-        elif "dubpr" in model.name:
+        elif model_name in "dubpr":
             _, loss = sess.run(
             [model.apply_grads, model.loss],
                 feed_dict={
                     model.users: train_batch[:, 0],
                     model.pos_items: train_batch[:, 1],
                     model.scores1_p: np.expand_dims(train_batch[:, 4], 1),
-                    model.scores1_n: np.expand_dims(train_batch[:, 4], 1),
+                    model.scores1_n: np.expand_dims(train_batch[:, 5], 1),
                     model.items2: train_batch[:, 2],
                     model.labels2: np.expand_dims(train_batch[:, 3], 1),
-                    model.scores2_p: np.expand_dims(train_batch[:, 5], 1),
-                    model.scores2_n: np.expand_dims(train_batch[:, 5], 1),
+                    model.scores2_p: np.expand_dims(train_batch[:, 6], 1),
+                    model.scores2_n: np.expand_dims(train_batch[:, 7], 1),
                 },
             )
         train_loss_list.append(loss)
@@ -255,7 +255,7 @@ def train_pairwise(
                 model.scores2: np.ones((num_val, 1)),
             },
         )
-    elif "ubpr" in model_name:
+    elif model_name in "ubpr":
         val_loss = sess.run(
             model.unbiased_loss,
             feed_dict={
@@ -267,18 +267,18 @@ def train_pairwise(
                 model.scores2: np.expand_dims(val[:, 5], 1),
             },
         )
-    elif "dubpr" in model_name:
+    elif model_name in "dubpr":
         val_loss = sess.run(
             model.unbiased_loss,
             feed_dict={
                 model.users: val[:, 0],
                 model.pos_items: val[:, 1],
                 model.scores1_p: np.expand_dims(val[:, 4], 1),
-                model.scores1_n: np.expand_dims(val[:, 4], 1),
+                model.scores1_n: np.expand_dims(val[:, 5], 1),
                 model.items2: val[:, 2],
                 model.labels2: np.expand_dims(val[:, 3], 1),
-                model.scores2_p: np.expand_dims(val[:, 5], 1),
-                model.scores2_n: np.expand_dims(val[:, 5], 1),
+                model.scores2_p: np.expand_dims(val[:, 6], 1),
+                model.scores2_n: np.expand_dims(val[:, 7], 1),
             },
         )
 

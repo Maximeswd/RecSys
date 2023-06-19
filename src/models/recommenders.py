@@ -170,6 +170,12 @@ class PairwiseRecommender(AbstractRecommender):
         self.rel1 = tf.placeholder(tf.float32, [None, 1], name='rel_ph1')
         self.rel2 = tf.placeholder(tf.float32, [None, 1], name='rel_ph2')
 
+        # New parameters
+        self.scores1_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
+        self.scores1_n = tf.placeholder(tf.float32, [None, 1], name='score_n')
+        self.scores2_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
+        self.scores2_n = tf.placeholder(tf.float32, [None, 1], name='score_n')
+
     def build_graph(self) -> None:
         """Build the main tensorflow graph with embedding layers."""
         with tf.name_scope('embedding_layer'):
@@ -208,7 +214,7 @@ class PairwiseRecommender(AbstractRecommender):
             local_losses = - self.rel1 * (1 - self.rel2) * tf.log(self.preds)
             self.ideal_loss = tf.reduce_sum(local_losses) / tf.reduce_sum(self.rel1 * (1 - self.rel2))
             # define the unbiased pairwise loss.
-            local_losses = - (1 / self.scores1) * ((1 - self.labels2) / self.scores2) * tf.log(self.preds)
+            local_losses = - (1 / self.scores1_p) * ((1 - self.labels2) / self.scores2_n) * tf.log(self.preds)
             # non-negative
             local_losses = tf.clip_by_value(local_losses, clip_value_min=-self.beta, clip_value_max=10e5)
             self.unbiased_loss = tf.reduce_mean(local_losses)

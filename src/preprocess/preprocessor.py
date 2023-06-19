@@ -255,7 +255,7 @@ def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: 
         .head(n_samples)
     ret = ret[ret["item_x"] != ret["item_y"]]
 
-    return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_p_x', 'theta_p_y', 'theta_n_x', 'theta_n_x']].values
+    return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_p_x', 'theta_p_y', 'theta_n_x', 'theta_n_y']].values
 
 
 if __name__ == "__main__":

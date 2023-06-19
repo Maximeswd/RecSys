@@ -36,22 +36,22 @@ if __name__ == "__main__":
     )
     trainer.run(num_sims=args.run_sims)
 
-    # debug variant
+    # # debug variant
     # warnings.filterwarnings("ignore")
     # tf.get_logger().setLevel("ERROR")
     
-    # config = yaml.safe_load(open('recsys/conf/config.yaml', 'rb'))
+    # config = yaml.safe_load(open('../RecSys/conf/config.yaml', 'rb'))
     # trainer = Trainer(
     #     data='yahoo',
     #     batch_size=config['batch_size'],
     #     max_iters=config['max_iters'],
     #     eta=config['eta'],
-    #     model_name='wmf',
+    #     model_name='dubpr',
     #     pointwise_loss='dual_unbiased_loss',
-    #     pairwise_loss='paper_loss'
+    #     pairwise_loss='dual_unbiased_loss'
     # )
     # trainer.run(num_sims=1)
 
-    print('\n', '=' * 25, '\n')
-    print(f'Finished Running !')
-    print('\n', '=' * 25, '\n')
+    # print('\n', '=' * 25, '\n')
+    # print(f'Finished Running !')
+    # print('\n', '=' * 25, '\n')
