@@ -129,8 +129,18 @@ def preprocess_dataset(data: str):
             test_ = test_[test_.rate != 0].reset_index(drop=True)
     # count the num. of users and items.
     num_users, num_items = train_.user.max() + 1, train_.item.max() + 1
-    train, test = train_.values, test_.values
+   
 
+    # train_['rate'] = np.where(train_['rate'] >= 4, 1, 0)
+    # test_['rate'] = np.where(test_['rate']  >= 4, 1, 0)
+
+    # df = train_.set_index(['user', 'item'])
+    # mux = pd.MultiIndex.from_product([df.index.levels[0], df.index.levels[1]], names = ['user', 'item'])
+    # dff = df.reindex(mux, fill_value = 0).reset_index()
+    
+    # train, test = dff.values, test_.values
+
+    train, test = train_.values, test_.values
     # transform rating into (0,1)-scale.
     test[:, 2] = transform_rating(ratings=test[:, 2], eps=0.0)
     rel_train = np.random.binomial(n=1, p=transform_rating(ratings=train[:, 2], eps=0.1))

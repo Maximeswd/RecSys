@@ -17,6 +17,9 @@ from models.expomf import ExpoMF
 from models.recommenders import PairwiseRecommender, PointwiseRecommender
 
 
+def train_ip(num_users: int, num_items: int, scores: np.ndarray,) -> Tuple:
+    return np.ones(shape=(num_users, 1)), scores.reshape(num_items, 1)
+
 def train_expomf(
     data: str,
     train: np.ndarray,
@@ -318,7 +321,7 @@ class Trainer:
         self.pointwise_loss = pointwise_loss
         self.pairwise_loss = pairwise_loss
 
-        if model_name != "expomf":
+        if model_name not in ["expomf", "ip"]:
             hyper_params = yaml.safe_load(open(f"../conf/hyper_params.yaml", "r"))[
                 data
             ][model_name]
@@ -410,6 +413,10 @@ class Trainer:
                     num_users=num_users,
                     num_items=num_items,
                 )
+            elif self.model_name == "ip":
+                u_emb, i_emb = train_ip(num_users=num_users, num_items=num_items, scores=pscore)
+                print(f" User embeddings {u_emb.shape}, item embeddings  {i_emb.shape}")
+                print(f"Items {num_items}, users {num_users}")
 
             result = aoa_evaluator(
                 user_embed=u_emb,

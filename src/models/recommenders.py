@@ -170,11 +170,12 @@ class PairwiseRecommender(AbstractRecommender):
         self.rel1 = tf.placeholder(tf.float32, [None, 1], name='rel_ph1')
         self.rel2 = tf.placeholder(tf.float32, [None, 1], name='rel_ph2')
 
-        # New parameters
-        self.scores1_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
-        self.scores1_n = tf.placeholder(tf.float32, [None, 1], name='score_n')
-        self.scores2_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
-        self.scores2_n = tf.placeholder(tf.float32, [None, 1], name='score_n')
+        if self.loss_function == 'dual_unbiased_loss':
+            # New parameters
+            self.scores1_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
+            self.scores1_n = tf.placeholder(tf.float32, [None, 1], name='score_n')
+            self.scores2_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
+            self.scores2_n = tf.placeholder(tf.float32, [None, 1], name='score_n')
 
     def build_graph(self) -> None:
         """Build the main tensorflow graph with embedding layers."""

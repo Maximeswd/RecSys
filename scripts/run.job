@@ -3,9 +3,9 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=fat_soil_shared
-#SBATCH --time=04:00:00
-#SBATCH --output=preprocess_job.out
-#SBATCH --error=test.job.err
+#SBATCH --time=8:00:00
+#SBATCH --output=run.out
+#SBATCH --error=run.err
 
 module purge
 module load 2021
@@ -14,4 +14,5 @@ module load Anaconda3/2021.05
 cd $HOME/recsys/src
 source activate recsys
 
-srun python run.py -d yahoo coat -m wmf expomf relmf bpr ubpr dubpr --pointwise_loss dual_unbiased_loss --pairwise_loss dual_unbiased_loss
+srun python run.py -d  yahoo -m wmf expomf relmf bpr ubpr ip --pointwise_loss paper_loss --pairwise_loss paper_loss
+srun python run.py -d  yahoo -m dubpr --pointwise_loss dual_unbiased_loss --pairwise_loss dual_unbiased_loss
