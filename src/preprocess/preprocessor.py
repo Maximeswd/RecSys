@@ -256,7 +256,7 @@ def preprocess_dataset(data: str):
     # estimate propensities and user-item frequencies.
     if data == 'yahoo':
         pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False) # num_clicks_user, BB_estimates
-        user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
+        user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (so some users have no clicks at all)
         item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
     elif data == 'coat':
         pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False) # num_clicks_user, BB_estimates
