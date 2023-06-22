@@ -288,6 +288,7 @@ def preprocess_dataset(data: str):
     np.save(file=path_data / 'point/val.npy', arr=val.astype(int))
     np.save(file=path_data / 'point/test.npy', arr=test)
     np.save(file=path_data / 'point/pscore.npy', arr=pscore)
+    np.save(file=path_data / 'point/nscore.npy', arr=nscore)
     if data == 'yahoo':
         np.save(file=path_data / 'point/user_freq.npy', arr=user_freq)
         np.save(file=path_data / 'point/item_freq.npy', arr=item_freq)
@@ -298,11 +299,20 @@ def preprocess_dataset(data: str):
     bpr_val = _bpr(data=val, n_samples=samples)
     ubpr_val = _ubpr(data=val, pscore=pscore, n_samples=samples)
     pair_test = _bpr_test(data=test, n_samples=samples)
+
+    # New model 
+    dubpr_train = _dubpr(data=train, n_samples=samples, pscore=pscore, nscore=nscore)
+    dubpr_val = _dubpr(data=val, n_samples=samples, pscore=pscore, nscore=nscore) 
+
     np.save(file=path_data / 'pair/bpr_train.npy', arr=bpr_train)
     np.save(file=path_data / 'pair/ubpr_train.npy', arr=ubpr_train)
     np.save(file=path_data / 'pair/bpr_val.npy', arr=bpr_val)
     np.save(file=path_data / 'pair/ubpr_val.npy', arr=ubpr_val)
     np.save(file=path_data / 'pair/test.npy', arr=pair_test)
+
+    # Save new model
+    np.save(file=path_data / 'pair/dubpr_train.npy', arr=dubpr_train)
+    np.save(file=path_data / 'pair/dubpr_val.npy', arr=dubpr_val)
 
 
 def _bpr(data: np.ndarray, n_samples: int) -> np.ndarray:
@@ -348,6 +358,22 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
     ret = ret[ret["item_x"] != ret["item_y"]]
 
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
+
+
+def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
+    """Generate training data for the dual unbiased learning."""
+    data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
+    df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
+    positive = df.query("click == 1")
+    #negative = df.query("click == 0")
+
+    ret = positive.merge(df, on="user")\
+        .sample(frac=1, random_state=12345)\
+        .groupby(["user", "item_x"])\
+        .head(n_samples)
+    ret = ret[ret["item_x"] != ret["item_y"]]
+
+    return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_p_x', 'theta_p_y', 'theta_n_x', 'theta_n_y']].values
 
 
 def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
