@@ -83,6 +83,9 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'user_e
     """
     Emperical Bayesian Estimation of Beta-Binomial (BB) for implicit feedback data.
     """
+
+    # Save the train_df as a global variable
+    global train_df
     
     # Put train into dataframe with columns user, item, rate and make all values integers
     train_df = pd.DataFrame(data, columns=['user', 'item', 'rate']).astype(int)
@@ -328,8 +331,15 @@ def _bpr_test(data: np.ndarray, n_samples: int) -> np.ndarray:
 
 def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
     """Generate training data for the unbiased bpr."""
-    data = np.c_[data, pscore[data[:, 1].astype(int)]]
-    df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta'])
+    # data1 = np.c_[train, pscore[train[:, 1].astype(int)]]
+    # data = np.c_[train, pscore]
+    
+    # Put the data into a dataframe
+    data2 = pd.DataFrame(data, columns=['user', 'item', 'click'])
+    
+    # Only select the rows of df that match the rows of data2 
+    df = pd.merge(train_df, data2, on=['user', 'item', 'click'], how='inner')
+    
     positive = df.query("click == 1")
     ret = positive.merge(df, on="user")\
         .sample(frac=1, random_state=12345)\
