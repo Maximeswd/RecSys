@@ -251,31 +251,35 @@ def preprocess_dataset(data: str):
 
     # extract only positive (relevant) user-item pairs
     train = train[rel_train == 1, :2]
-    # creating training data
+    # Creating training data
     all_data = pd.DataFrame(np.zeros((num_users, num_items))).stack().reset_index().values[:, :2]
     unlabeled_data = np.array(list(set(map(tuple, all_data)) - set(map(tuple, train))), dtype=int)
     train = np.r_[np.c_[train, np.ones(train.shape[0])], np.c_[unlabeled_data, np.zeros(unlabeled_data.shape[0])]]
-    
+
+    # # Estimate propensities and user-item frequencies.
+    # if data == 'yahoo':
+    #     user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
+    #     item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
+    #     pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False)
+    #     nscore = 1 - pscore
+
+    # elif data == 'coat':
+    #     pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False)
+    #     nscore = 1 - pscore
+
     # estimate propensities and user-item frequencies.
     if data == 'yahoo':
-        pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False) # num_clicks_user, BB_estimates
-        user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (so some users have no clicks at all)
+        user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns len = 15229 (which should be 15400 I would say)
         item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
-    elif data == 'coat':
-        pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False) # num_clicks_user, BB_estimates
+        pscore = (item_freq / item_freq.max()) ** 0.5
+        nscore = (1 - (item_freq / item_freq.max())) ** 0.5
 
-    
-    # estimate propensities and user-item frequencies.
-    # if data == 'yahoo':
-    #     user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns len = 15229 (which should be 15400 I would say)
-    #     item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
-    #     pscore = (item_freq / item_freq.max()) ** 0.5
-    
-    # elif data == 'coat':
-        # matrix = sparse.lil_matrix((num_users, num_items))
-        # for (u, i) in train[:, :2]:
-        #     matrix[u, i] = 1
-    #     pscore1 = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
+    elif data == 'coat':
+        matrix = sparse.lil_matrix((num_users, num_items))
+        for (u, i) in train[:, :2]:
+            matrix[u, i] = 1
+        pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
+        nscore = np.clip(1 - np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
     
     # train-val split using the raw training datasets
     train, val = train_test_split(train, test_size=0.1, random_state=12345)
@@ -358,22 +362,6 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
     ret = ret[ret["item_x"] != ret["item_y"]]
 
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
-
-
-def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
-    """Generate training data for the dual unbiased learning."""
-    data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
-    df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
-    positive = df.query("click == 1")
-    #negative = df.query("click == 0")
-
-    ret = positive.merge(df, on="user")\
-        .sample(frac=1, random_state=12345)\
-        .groupby(["user", "item_x"])\
-        .head(n_samples)
-    ret = ret[ret["item_x"] != ret["item_y"]]
-
-    return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_p_x', 'theta_p_y', 'theta_n_x', 'theta_n_y']].values
 
 
 def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
