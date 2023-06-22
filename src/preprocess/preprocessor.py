@@ -331,8 +331,8 @@ def _bpr_test(data: np.ndarray, n_samples: int) -> np.ndarray:
 
 def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
     """Generate training data for the unbiased bpr."""
-    # data1 = np.c_[train, pscore[train[:, 1].astype(int)]]
-    # data = np.c_[train, pscore]
+    # data1 = np.c_[data, pscore[train[:, 1].astype(int)]]
+    # data = np.c_[data, pscore]
     
     # Put the data into a dataframe
     data2 = pd.DataFrame(data, columns=['user', 'item', 'click'])
