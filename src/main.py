@@ -11,7 +11,7 @@ import tensorflow as tf
 from trainer import Trainer
 
 parser = argparse.ArgumentParser()
-possible_model_names = ['bpr', 'ubpr', 'wmf', 'expomf', 'relmf', 'dubpr', 'ip']
+possible_model_names = ['bpr', 'ubpr', 'wmf', 'expomf', 'dumf', 'relmf', 'dubpr', 'ip']
 parser.add_argument('--model_name', '-m', type=str, required=True, choices=possible_model_names)
 parser.add_argument('--run_sims', '-r', type=int, default=10, required=True)
 parser.add_argument('--data', '-d', type=str, required=True, choices=['coat', 'yahoo'])
@@ -46,12 +46,12 @@ if __name__ == "__main__":
     #     batch_size=config['batch_size'],
     #     max_iters=config['max_iters'],
     #     eta=config['eta'],
-    #     model_name='dubpr',
+    #     model_name='dumf',
     #     pointwise_loss='dual_unbiased_loss',
     #     pairwise_loss='dual_unbiased_loss'
     # )
     # trainer.run(num_sims=1)
 
-    # print('\n', '=' * 25, '\n')
-    # print(f'Finished Running !')
-    # print('\n', '=' * 25, '\n')
+    print('\n', '=' * 25, '\n')
+    print(f'Finished Running !')
+    print('\n', '=' * 25, '\n')

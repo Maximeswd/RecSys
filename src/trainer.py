@@ -79,7 +79,7 @@ def train_pointwise(
     init_op = tf.global_variables_initializer()
     sess.run(init_op)
 
-    ips = model_name == "relmf"
+    ips = model_name == "relmf" or "dumf"
     # pscore for train
     pscore = pscore[train[:, 1].astype(int)]
 
@@ -382,7 +382,7 @@ class Trainer:
                     batch_size=self.batch_size,
                     model_name=self.model_name,
                 )
-            elif self.model_name in ["wmf", "relmf"]:
+            elif self.model_name in ["wmf", "relmf", "dumf"]:
                 point_rec = PointwiseRecommender(
                     num_users=num_users,
                     num_items=num_items,

@@ -109,8 +109,8 @@ class PointwiseRecommender(AbstractRecommender):
             pscores = tf.clip_by_value(self.pscores, clip_value_min=self.clip, clip_value_max=1.0) 
             nscores = tf.clip_by_value(self.nscores, clip_value_min=self.clip, clip_value_max=1.0) 
 
-            local_losses = (self.labels / pscores) *  tf.log(1. - self.preds) 
-            local_losses += self.weight * ((1 - self.labels) / nscores) * tf.log(self.preds) 
+            local_losses = (self.labels / pscores) *  tf.square(1. - self.preds) 
+            local_losses += self.weight * ((1 - self.labels) / nscores) * tf.square(self.preds) 
             local_losses = tf.clip_by_value(local_losses, clip_value_min=-1000, clip_value_max=1000)
 
             numerator = tf.reduce_sum(self.labels + self.weight * (1 - self.labels))
