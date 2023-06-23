@@ -1,6 +1,7 @@
 """
 Codes for preprocessing datasets used in the real-world experiments
-in the paper "Unbiased Pairwise Learning from Biased Implicit Feedback".
+in the paper "Unbiased Pairwise Learning from Biased Implicit Feedback"
+Extended with the code from a "Reproducibility study: Unbiased Pairwise Learning from Biased Implicit Feedback"
 """
 import codecs
 from pathlib import Path
@@ -15,14 +16,13 @@ import matplotlib.pyplot as plt
 
 
 def transform_rating(ratings: np.ndarray, eps: float = 0.1) -> np.ndarray:
-    """Transform ratings into graded relevance information."""
+    """ Transform ratings into graded relevance information."""
     ratings = ratings - 1
-    # ratings -= 1
     return np.round(eps + (1. - eps) * (2 ** ratings - 1) / (2 ** np.max(ratings) - 1))
 
 # Define the data
 def mm_est(x, n):
-    """Estimate the parameters of a beta distribution from a binomial sample using the method of moments."""
+    """ Estimate the parameters of a beta distribution from a binomial sample using the method of moments."""
     
     # Check if x and n are arrays, otherwise convert them to arrays
     if type(x) != np.ndarray:
@@ -74,12 +74,11 @@ def mm_est(x, n):
     return alpha, beta
 
 # prior as avg across all user item pairs, count estimate each pair based on that 
-# if we have perfect propensities, how does it perform? And doe sit perform extremely better?
+# if we have perfect propensities, how does it perform? And does it perform extremely better?
 
 # Oui, bernoulli
 
-def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'user_est', inverse = True):
-    
+def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'bb-user', inverse = True):
     """
     Emperical Bayesian Estimation of Beta-Binomial (BB) for implicit feedback data.
     """
@@ -90,7 +89,7 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'user_e
     # Put train into dataframe with columns user, item, rate and make all values integers
     train_df = pd.DataFrame(data, columns=['user', 'item', 'rate']).astype(int)
 
-    if kind == 'user_est':
+    if kind == 'bb-user':
         # Get the number of total clicks per user
         num_clicks_user = train_df.groupby('user').sum('rate').values[:, 1]
         
@@ -119,7 +118,7 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'user_e
         # return alpha, beta, BB_estimates
         return BB_estimates
 
-    elif kind == 'item_est':
+    elif kind == 'bb-item':
         
         # Get the number of total clicks per user
         num_clicks_item = train_df.groupby('item').sum('rate').values[:, 1]
@@ -148,7 +147,7 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'user_e
         
         return BB_estimates
 
-    elif kind == 'combi':
+    elif kind == 'bb-item_user':
         
         # Get the number of total clicks per user
         num_clicks_user = train_df.groupby('user').sum('rate').values[:, 1]
@@ -205,26 +204,26 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'user_e
         
         return BB_estimates_combi
 
-def preprocess_dataset(data: str):
+def preprocess_dataset(data: str, propensity: str):
     """Load and preprocess datasets."""
     np.random.seed(12345)
     if data == 'yahoo':
         cols = {0: 'user', 1: 'item', 2: 'rate'}
-        with codecs.open(f'../data/yahoo/raw/train.txt', 'r', 'utf-8', errors='ignore') as f:
+        with codecs.open(f'../RecSys/data/yahoo/raw/train.txt', 'r', 'utf-8', errors='ignore') as f:
             train_ = pd.read_csv(f, delimiter='\t', header=None)
             train_.rename(columns=cols, inplace=True)
-        with codecs.open(f'../data/yahoo/raw/test.txt', 'r', 'utf-8', errors='ignore') as f:
+        with codecs.open(f'../RecSys/data/yahoo/raw/test.txt', 'r', 'utf-8', errors='ignore') as f:
             test_ = pd.read_csv(f, delimiter='\t', header=None)
             test_.rename(columns=cols, inplace=True)
         for _data in [train_, test_]:
             _data.user, _data.item = _data.user - 1, _data.item - 1
     elif data == 'coat':
         cols = {'level_0': 'user', 'level_1': 'item', 2: 'rate', 0: 'rate'}
-        with codecs.open(f'../data/coat/raw/train.ascii', 'r', 'utf-8', errors='ignore') as f:
+        with codecs.open(f'../RecSys/data/coat/raw/train.ascii', 'r', 'utf-8', errors='ignore') as f:
             train_ = pd.read_csv(f, delimiter=' ', header=None)
             train_ = train_.stack().reset_index().rename(columns=cols)
             train_ = train_[train_.rate != 0].reset_index(drop=True)
-        with codecs.open(f'../data/coat/raw/test.ascii', 'r', 'utf-8', errors='ignore') as f:
+        with codecs.open(f'../RecSys/data/coat/raw/test.ascii', 'r', 'utf-8', errors='ignore') as f:
             test_ = pd.read_csv(f, delimiter=' ', header=None)
             test_ = test_.stack().reset_index().rename(columns=cols)
             test_ = test_[test_.rate != 0].reset_index(drop=True)
@@ -256,35 +255,40 @@ def preprocess_dataset(data: str):
     unlabeled_data = np.array(list(set(map(tuple, all_data)) - set(map(tuple, train))), dtype=int)
     train = np.r_[np.c_[train, np.ones(train.shape[0])], np.c_[unlabeled_data, np.zeros(unlabeled_data.shape[0])]]
 
-    # # Estimate propensities and user-item frequencies.
-    # if data == 'yahoo':
-    #     user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
-    #     item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
-    #     pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False)
-    #     nscore = 1 - pscore
+    if propensity in ['bb-item', 'bb-user','bb-item_user']:
 
-    # elif data == 'coat':
-    #     pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False)
-    #     nscore = 1 - pscore
+        # Estimate propensities and user-item frequencies.
+        if data == 'yahoo':
+            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
+            item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
+            pscore = bayesian_BB(train, num_users, num_items, kind=propensity, inverse=False)
+            nscore = 1 - pscore
 
-    # estimate propensities and user-item frequencies.
-    if data == 'yahoo':
-        user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns len = 15229 (which should be 15400 I would say)
-        item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
-        pscore = (item_freq / item_freq.max()) ** 0.5
-        nscore = (1 - (item_freq / item_freq.max())) ** 0.5
+        elif data == 'coat':
+            pscore = bayesian_BB(train, num_users, num_items, kind=propensity, inverse=False)
+            nscore = 1 - pscore
 
-    elif data == 'coat':
-        matrix = sparse.lil_matrix((num_users, num_items))
-        for (u, i) in train[:, :2]:
-            matrix[u, i] = 1
-        pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
-        nscore = np.clip(1 - np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
-    
+    if propensity == "original":
+        # estimate propensities and user-item frequencies.
+        if data == 'yahoo':
+            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns len = 15229 (which should be 15400 I would say)
+            item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
+            pscore = (item_freq / item_freq.max()) ** 0.5
+            # nscore = (1 - (item_freq / item_freq.max())) ** 0.5
+            nscore = 1 - pscore
+
+        elif data == 'coat':
+            matrix = sparse.lil_matrix((num_users, num_items))
+            for (u, i) in train[:, :2]:
+                matrix[u, i] = 1
+            pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
+            #nscore = np.clip(1 - np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
+            nscore = 1 - pscore
+        
     # train-val split using the raw training datasets
     train, val = train_test_split(train, test_size=0.1, random_state=12345)
     # save preprocessed datasets
-    path_data = Path(f'../data/{data}')
+    path_data = Path(f'../data/{data}/{propensity}')
     (path_data / 'point').mkdir(parents=True, exist_ok=True)
     (path_data / 'pair').mkdir(parents=True, exist_ok=True)
     # pointwise
@@ -365,7 +369,7 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
 
 
 def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
-    """Generate training data for the dual unbiased learning."""
+    """Generate training data for the dual unbiased bpr."""
     data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
     df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
     positive = df.query("click == 1")
@@ -382,8 +386,9 @@ def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: 
 
 if __name__ == "__main__":
     
-    data = 'yahoo'
-    preprocess_dataset(data=data)
+    data = 'coat'
+    propensity = 'bb-item_user'
+    preprocess_dataset(data=data, propensity=propensity)
 
     print('\n', '=' * 25, '\n')
     print(f'Finished Preprocessing {data}!')
