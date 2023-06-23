@@ -260,7 +260,7 @@ def preprocess_dataset(data: str, propensity: str):
             item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
             pscore = bayesian_BB(train, num_users, num_items, kind='item_est', inverse=False)
             nscore = 1 - pscore
-        elif propensity == 'bb-item_user':
+        elif propensity == 'bb-item-user':
             user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
             item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
             pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False)
@@ -277,7 +277,7 @@ def preprocess_dataset(data: str, propensity: str):
         if propensity == 'bb-item':
             pscore = bayesian_BB(train, num_users, num_items, kind='item_est', inverse=False)
             nscore = 1 - pscore
-        elif propensity == 'bb-item_user':
+        elif propensity == 'bb-item-user':
             user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
             item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
             pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False)
