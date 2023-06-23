@@ -249,9 +249,6 @@ def preprocess_dataset(data: str, propensity: str):
             pscore = bayesian_BB(train, num_users, num_items, kind='item_est')
             nscore = 1 - pscore
         elif propensity == 'bb-item-user':
-
-            # user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
-            # item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
             pscore = bayesian_BB(train, num_users, num_items, kind='combi')
             nscore = 1 - pscore
         elif propensity == 'original':
@@ -327,13 +324,9 @@ def _bpr_test(data: np.ndarray, n_samples: int) -> np.ndarray:
 
 def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
     """Generate training data for the unbiased bpr."""
-    
-    # Put the data into a dataframe
-    data2 = pd.DataFrame(data, columns=['user', 'item', 'click'])
-    
-    # Only select the rows of df that match the rows of data2 
-    df = pd.merge(train_df, data2, on=['user', 'item', 'click'], how='inner')
-    
+
+    data = np.c_[data, pscore[data[:, 1].astype(int)]]
+    df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta'])
     positive = df.query("click == 1")
     ret = positive.merge(df, on="user")\
         .sample(frac=1, random_state=12345)\
@@ -342,7 +335,6 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
     ret = ret[ret["item_x"] != ret["item_y"]]
 
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
-
 
 def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
     """Generate training data for the dual unbiased bpr."""
