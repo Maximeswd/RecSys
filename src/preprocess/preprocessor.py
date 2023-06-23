@@ -89,120 +89,118 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'bb-use
     # Put train into dataframe with columns user, item, rate and make all values integers
     train_df = pd.DataFrame(data, columns=['user', 'item', 'rate']).astype(int)
 
-    if kind == 'bb-user':
-        # Get the number of total clicks per user
-        num_clicks_user = train_df.groupby('user').sum('rate').values[:, 1]
-        
-        # Each user, could've clicked on each item, so we get the total number of impressions per user
-        num_impres_user = np.full(num_users, num_items)  
-        
-        # Get the estimates of the beta distribution parameters over all users
-        alpha, beta = mm_est(num_clicks_user, num_impres_user)
-        
-        # Get the estimates of the beta distribution parameters for each user
-        BB_estimates = []
-        for y, n in zip(num_clicks_user, num_impres_user):
-            theta = (y + alpha) / (n + alpha + beta)
-            BB_estimates.append(theta)
+    # Get the number of total clicks per user
+    num_clicks_user = train_df.groupby('user').sum('rate').values[:, 1]
+    
+    # Each user, could've clicked on each item, so we get the total number of impressions per user
+    num_impres_user = np.full(num_users, num_items)  
+    
+    # Get the estimates of the beta distribution parameters over all users
+    alpha, beta = mm_est(num_clicks_user, num_impres_user)
+    
+    # Get the estimates of the beta distribution parameters for each user
+    BB_estimates = []
+    for y, n in zip(num_clicks_user, num_impres_user):
+        theta = (y + alpha) / (n + alpha + beta)
+        BB_estimates.append(theta)
 
-        # Normalize the probability estimates
-        BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)
-        
-        # Delete the dataframe to save memory
-        del train_df
+    # Normalize the probability estimates
+    BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)
+    
+    # Delete the dataframe to save memory
+    del train_df
 
-        if inverse:
-            # Inverse the estimates to get the user estimates
-            BB_estimates = 1 - BB_estimates
-        
-        # return alpha, beta, BB_estimates
-        return BB_estimates
+    if inverse:
+        # Inverse the estimates to get the user estimates
+        BB_estimates = 1 - BB_estimates
+    
+    # return alpha, beta, BB_estimates
+    return BB_estimates
 
-    elif kind == 'bb-item':
         
-        # Get the number of total clicks per user
-        num_clicks_item = train_df.groupby('item').sum('rate').values[:, 1]
-        
-        # Each user, could've clicked on each item, so we get the total number of impressions per user
-        num_impres_item = np.full(num_items, num_users)  
-        
-        # Get the estimates of the beta distribution parameters over all users
-        alpha, beta = mm_est(num_clicks_item, num_impres_item)
-        
-        # Get the estimates of the beta distribution parameters for each user
-        BB_estimates = []
-        for y, n in zip(num_clicks_item, num_impres_item):
-            theta = (y + alpha) / (n + alpha + beta)
-            BB_estimates.append(theta)
-        
-        # Delete the dataframe to save memory
-        del train_df
-        
-        # Normalize the probability estimates
-        BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)   
+    # Get the number of total clicks per user
+    num_clicks_item = train_df.groupby('item').sum('rate').values[:, 1]
+    
+    # Each user, could've clicked on each item, so we get the total number of impressions per user
+    num_impres_item = np.full(num_items, num_users)  
+    
+    # Get the estimates of the beta distribution parameters over all users
+    alpha, beta = mm_est(num_clicks_item, num_impres_item)
+    
+    # Get the estimates of the beta distribution parameters for each user
+    BB_estimates = []
+    for y, n in zip(num_clicks_item, num_impres_item):
+        theta = (y + alpha) / (n + alpha + beta)
+        BB_estimates.append(theta)
+    
+    # Delete the dataframe to save memory
+    del train_df
+    
+    # Normalize the probability estimates
+    BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)   
 
-        if inverse: 
-            # Inverse the estimates to get the item estimates
-            BB_estimates = 1 - BB_estimates
-        
-        return BB_estimates
+    if inverse: 
+        # Inverse the estimates to get the item estimates
+        BB_estimates = 1 - BB_estimates
+    
+    return BB_estimates
 
-    elif kind == 'bb-item_user':
+    
         
-        # Get the number of total clicks per user
-        num_clicks_user = train_df.groupby('user').sum('rate').values[:, 1]
-        
-        # Get the number of total clicks per user
-        num_clicks_item = train_df.groupby('item').sum('rate').values[:, 1]
-        
-        # Each user, could've clicked on each item, so we get the total number of impressions per user
-        num_impres_user = np.full(num_users, num_items)  
-        
-        # Each user, could've clicked on each item, so we get the total number of impressions per user
-        num_impres_item = np.full(num_items, num_users)  
-        
-        # Get the estimates of the beta distribution parameters over all users
-        alpha_user, beta_user = mm_est(num_clicks_user, num_impres_user)
-        alpha_item, beta_item = mm_est(num_clicks_item, num_impres_item)
-        
-        # Get the estimates of the beta distribution parameters for each user
-        BB_estimates_user = []
-        BB_estimates_item = []
-        for y, n in zip(num_clicks_user, num_impres_user):
-            theta = (y + alpha_user) / (n + alpha_user + beta_user)
-            BB_estimates_user.append(theta)
+    # Get the number of total clicks per user
+    num_clicks_user = train_df.groupby('user').sum('rate').values[:, 1]
+    
+    # Get the number of total clicks per user
+    num_clicks_item = train_df.groupby('item').sum('rate').values[:, 1]
+    
+    # Each user, could've clicked on each item, so we get the total number of impressions per user
+    num_impres_user = np.full(num_users, num_items)  
+    
+    # Each user, could've clicked on each item, so we get the total number of impressions per user
+    num_impres_item = np.full(num_items, num_users)  
+    
+    # Get the estimates of the beta distribution parameters over all users
+    alpha_user, beta_user = mm_est(num_clicks_user, num_impres_user)
+    alpha_item, beta_item = mm_est(num_clicks_item, num_impres_item)
+    
+    # Get the estimates of the beta distribution parameters for each user
+    BB_estimates_user = []
+    BB_estimates_item = []
+    for y, n in zip(num_clicks_user, num_impres_user):
+        theta = (y + alpha_user) / (n + alpha_user + beta_user)
+        BB_estimates_user.append(theta)
 
-        for y, n in zip(num_clicks_item, num_impres_item):
-            theta = (y + alpha_item) / (n + alpha_item + beta_item)
-            BB_estimates_item.append(theta)
+    for y, n in zip(num_clicks_item, num_impres_item):
+        theta = (y + alpha_item) / (n + alpha_item + beta_item)
+        BB_estimates_item.append(theta)
+        
+    # # Normalize the probability estimates: makes performance worse, since we normalize twice
+    # BB_estimates_user = np.array(BB_estimates_user) / np.sum(BB_estimates_user)
+    # BB_estimates_item = np.array(BB_estimates_item) / np.sum(BB_estimates_item)
+    
+    # loop through all user item pairs and get the combined estimate
+    BB_estimates_combi = []
+    for user in range(num_users):
+        for item in range(num_items):
             
-        # # Normalize the probability estimates: makes performance worse, since we normalize twice
-        # BB_estimates_user = np.array(BB_estimates_user) / np.sum(BB_estimates_user)
-        # BB_estimates_item = np.array(BB_estimates_item) / np.sum(BB_estimates_item)
-        
-        # loop through all user item pairs and get the combined estimate
-        BB_estimates_combi = []
-        for user in range(num_users):
-            for item in range(num_items):
-                
-                # BB_estimates_combi.append(BB_estimates_user[user] * BB_estimates_item[item])
-                BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]))
-                
-                if inverse:
-                    # BB_estimates_combi.append(1 - (BB_estimates_user[user] +  BB_estimates_item[item]))
-                    # BB_estimates_combi.append((1 - BB_estimates_user[user]) * (1 - BB_estimates_item[item]))
-                    # BB_estimates_combi.append(1 - (BB_estimates_user[user] *  BB_estimates_item[item]))
-                    BB_estimates_combi.append(1 - ((BB_estimates_user[user] +  BB_estimates_item[item]) / 2))
-                    # BB_estimates_combi.append(BB_estimates_user[user] + BB_estimates_item[item])
-                    # BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]) / 2)
+            # BB_estimates_combi.append(BB_estimates_user[user] * BB_estimates_item[item])
+            BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]))
+            
+            if inverse:
+                # BB_estimates_combi.append(1 - (BB_estimates_user[user] +  BB_estimates_item[item]))
+                # BB_estimates_combi.append((1 - BB_estimates_user[user]) * (1 - BB_estimates_item[item]))
+                # BB_estimates_combi.append(1 - (BB_estimates_user[user] *  BB_estimates_item[item]))
+                BB_estimates_combi.append(1 - ((BB_estimates_user[user] +  BB_estimates_item[item]) / 2))
+                # BB_estimates_combi.append(BB_estimates_user[user] + BB_estimates_item[item])
+                # BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]) / 2)
 
-        # Normalize the probability estimates
-        BB_estimates_combi = np.array(BB_estimates_combi) / np.sum(BB_estimates_combi)
-        
-        # Delete the dataframe to save memory
-        del train_df
-        
-        return BB_estimates_combi
+    # Normalize the probability estimates
+    BB_estimates_combi = np.array(BB_estimates_combi) / np.sum(BB_estimates_combi)
+    
+    # Delete the dataframe to save memory
+    del train_df
+    
+    return BB_estimates_combi
 
 def preprocess_dataset(data: str, propensity: str):
     """Load and preprocess datasets."""
@@ -255,35 +253,43 @@ def preprocess_dataset(data: str, propensity: str):
     unlabeled_data = np.array(list(set(map(tuple, all_data)) - set(map(tuple, train))), dtype=int)
     train = np.r_[np.c_[train, np.ones(train.shape[0])], np.c_[unlabeled_data, np.zeros(unlabeled_data.shape[0])]]
 
-    if propensity in ['bb-item', 'bb-user','bb-item_user']:
-
-        # Estimate propensities and user-item frequencies.
-        if data == 'yahoo':
+    # Estimate propensities and user-item frequencies.
+    if data == 'yahoo':
+        if propensity == 'bb-item':
             user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
             item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
-            pscore = bayesian_BB(train, num_users, num_items, kind=propensity, inverse=False)
+            pscore = bayesian_BB(train, num_users, num_items, kind='item_est', inverse=False)
             nscore = 1 - pscore
-
-        elif data == 'coat':
-            pscore = bayesian_BB(train, num_users, num_items, kind=propensity, inverse=False)
+        elif propensity == 'bb-item_user':
+            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
+            item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
+            pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False)
             nscore = 1 - pscore
-
-    if propensity == "original":
-        # estimate propensities and user-item frequencies.
-        if data == 'yahoo':
+        elif propensity == 'original':
             user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns len = 15229 (which should be 15400 I would say)
             item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
             pscore = (item_freq / item_freq.max()) ** 0.5
-            # nscore = (1 - (item_freq / item_freq.max())) ** 0.5
             nscore = 1 - pscore
-
-        elif data == 'coat':
+        else:
+            raise ValueError(f"Invalid propensity method: {propensity}")
+    
+    elif data == 'coat':
+        if propensity == 'bb-item':
+            pscore = bayesian_BB(train, num_users, num_items, kind='item_est', inverse=False)
+            nscore = 1 - pscore
+        elif propensity == 'bb-item_user':
+            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
+            item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
+            pscore = bayesian_BB(train, num_users, num_items, kind='combi', inverse=False)
+            nscore = 1 - pscore
+        elif propensity == 'original':
             matrix = sparse.lil_matrix((num_users, num_items))
             for (u, i) in train[:, :2]:
                 matrix[u, i] = 1
             pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
-            #nscore = np.clip(1 - np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
             nscore = 1 - pscore
+        else:
+            raise ValueError(f"Invalid propensity method: {propensity}")
         
     # train-val split using the raw training datasets
     train, val = train_test_split(train, test_size=0.1, random_state=12345)
