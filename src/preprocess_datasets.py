@@ -10,7 +10,7 @@ from preprocess.preprocessor import preprocess_dataset
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--datasets', '-d', nargs='*', type=str, required=True, choices=['coat', 'yahoo'])
-parser.add_argument('--propensity_estimation', '-p', nargs='*', type=str, required=True, choices=['original', 'bb-item', 'bb-item_user'])
+parser.add_argument('--propensity_estimation', '-p', nargs='*', type=str, required=True, choices=['original', 'bb-item', 'bb-item-user'])
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
