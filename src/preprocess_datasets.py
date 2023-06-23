@@ -17,9 +17,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     for data in args.datasets:
-        for propensity in args.propensity_estimation:
-            preprocess_dataset(data=data, propensity=propensity)
+        preprocess_dataset(data=data, propensity=args.propensity)
 
-            print('\n', '=' * 25, '\n')
-            print(f'Finished Preprocessing {data}!')
-            print('\n', '=' * 25, '\n')
+        print('\n', '=' * 25, '\n')
+        print(f'Finished Preprocessing {data}!')
+        print('\n', '=' * 25, '\n')
