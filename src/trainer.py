@@ -315,11 +315,13 @@ class Trainer:
         batch_size: int = 12,
         eta: float = 0.1,
         model_name: str = "bpr",
+        propensity: str = 'original',
     ) -> None:
         """Initialize class."""
         self.data = data
         self.pointwise_loss = pointwise_loss
         self.pairwise_loss = pairwise_loss
+        self.propensity = propensity
 
         if model_name not in ["expomf", "ip"]:
             hyper_params = yaml.safe_load(open(f"../conf/hyper_params.yaml", "r"))[
@@ -328,6 +330,9 @@ class Trainer:
             self.dim = np.int(hyper_params["dim"])
             self.lam = hyper_params["lam"]
             self.weight = hyper_params["weight"] if model_name == "wmf" else 1.0
+            # TODO this is adjusted for dumf and ubpr
+            # self.clip = hyper_params["clip"] if model_name in ["relmf", 'dumf'] else 0.0
+            # self.beta = hyper_params["beta"] if model_name in ["ubpr", "dubpr"] else 0.0
             self.clip = hyper_params["clip"] if model_name == "relmf" else 0.0
             self.beta = hyper_params["beta"] if model_name == "ubpr" else 0.0
         self.batch_size = batch_size
@@ -338,27 +343,27 @@ class Trainer:
     def run(self, num_sims: int = 10) -> None:
         """Train implicit recommenders."""
 
-        train_point = np.load(f"../data/{self.data}/point/train.npy")
-        val_point = np.load(f"../data/{self.data}/point/val.npy")
-        test_point = np.load(f"../data/{self.data}/point/test.npy")
-        pscore = np.load(f"../data/{self.data}/point/pscore.npy")
-        nscore = np.load(f"../data/{self.data}/point/nscore.npy")
+        train_point = np.load(f"../data/{self.data}/{self.propensity}/point/train.npy")
+        val_point = np.load(f"../data/{self.data}/{self.propensity}/point/val.npy")
+        test_point = np.load(f"../data/{self.data}/{self.propensity}/point/test.npy")
+        pscore = np.load(f"../data/{self.data}/{self.propensity}/point/pscore.npy")
+        nscore = np.load(f"../data/{self.data}/{self.propensity}/point/nscore.npy")
         num_users = np.int(train_point[:, 0].max() + 1)
         num_items = np.int(train_point[:, 1].max() + 1)
         if self.model_name in ["bpr", "ubpr", "dubpr"]:
-            train = np.load(f"../data/{self.data}/pair/{self.model_name}_train.npy")
-            val = np.load(f"../data/{self.data}/pair/{self.model_name}_val.npy")
-            test = np.load(f"../data/{self.data}/pair/test.npy")
+            train = np.load(f"../data/{self.data}/{self.propensity}/pair/{self.model_name}_train.npy")
+            val = np.load(f"../data/{self.data}/{self.propensity}/pair/{self.model_name}_val.npy")
+            test = np.load(f"../data/{self.data}/{self.propensity}/pair/test.npy")
         if self.data == "yahoo":
-            user_freq = np.load(f"../data/{self.data}/point/user_freq.npy")
-            item_freq = np.load(f"../data/{self.data}/point/item_freq.npy")
+            user_freq = np.load(f"../data/{self.data}/{self.propensity}/point/user_freq.npy")
+            item_freq = np.load(f"../data/{self.data}/{self.propensity}/point/item_freq.npy")
 
         result_list = list()
         if self.data == "yahoo":
             cold_user_result_list = list()
             rare_item_result_list = list()
         for seed in np.arange(num_sims):
-            tf.set_random_seed(12345) # TODO change seed to random 
+            tf.set_random_seed(12345) # TODO set seed to random 
             ops.reset_default_graph()
             sess = tf.Session()
             if self.model_name in ["ubpr", "bpr", "dubpr"]:
@@ -415,8 +420,6 @@ class Trainer:
                 )
             elif self.model_name == "ip":
                 u_emb, i_emb = train_ip(num_users=num_users, num_items=num_items, scores=pscore)
-                print(f" User embeddings {u_emb.shape}, item embeddings  {i_emb.shape}")
-                print(f"Items {num_items}, users {num_users}")
 
             result = aoa_evaluator(
                 user_embed=u_emb,
@@ -452,7 +455,7 @@ class Trainer:
 
             print(f"#{seed+1}: {self.model_name}...")
 
-        ret_path = Path(f"../logs/{self.data}/{self.model_name}/results")
+        ret_path = Path(f"../logs/{self.data}/{self.propensity}/{self.model_name}/results")
         ret_path.mkdir(parents=True, exist_ok=True)
         pd.concat(result_list, 1).to_csv(ret_path / f"aoa_all.csv")
         if self.data == "yahoo":

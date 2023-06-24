@@ -17,6 +17,7 @@ parser.add_argument('--run_sims', '-r', type=int, default=10, required=True)
 parser.add_argument('--data', '-d', type=str, required=True, choices=['coat', 'yahoo'])
 parser.add_argument('--pointwise_loss', type=str, help='Pointwise loss function to use', required=True)
 parser.add_argument('--pairwise_loss', type=str, help='Pairwise loss function to use', required=True)
+parser.add_argument('--propensity', '-p', type=str, required=True, choices=['original', 'bb-item', 'bb-item-user'])
 
 
 if __name__ == "__main__":
@@ -32,8 +33,9 @@ if __name__ == "__main__":
         eta=config['eta'],
         model_name=args.model_name,
         pointwise_loss=args.pointwise_loss,
-        pairwise_loss=args.pairwise_loss
-    )
+        pairwise_loss=args.pairwise_loss,
+        propensity=args.propensity
+        )
     trainer.run(num_sims=args.run_sims)
 
     # # debug variant

@@ -14,4 +14,4 @@ module load Anaconda3/2021.05
 cd $HOME/recsys/src
 source activate recsys
 
-srun python summarize_results.py -d coat
+srun python summarize_results.py -d coat yahoo -p original bb-item bb-item-user

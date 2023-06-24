@@ -45,7 +45,7 @@ class PointwiseRecommender(AbstractRecommender):
     eta: float
     weight: float = 1.
     clip: float = 0.
-    loss_function: str = 'paper_loss'
+    loss_function: str = 'original'
 
     def __post_init__(self,) -> None:
         """Initialize Class."""
@@ -77,7 +77,7 @@ class PointwiseRecommender(AbstractRecommender):
             self.logits = tf.reduce_sum(tf.multiply(self.u_embed, self.i_embed), 1)
             self.preds = tf.sigmoid(tf.expand_dims(self.logits, 1), name='sigmoid_prediction')
 
-    def paper_loss(self):
+    def original_loss(self):
         with tf.name_scope('losses'):
             # define the unbiased loss for the ideal loss function with binary implicit feedback.
             scores = tf.clip_by_value(self.scores, clip_value_min=self.clip, clip_value_max=1.0) #clip between 0 and 1
@@ -125,9 +125,9 @@ class PointwiseRecommender(AbstractRecommender):
         """Create the losses."""
 
         loss_func_mapping = {
-            'paper_loss': self.paper_loss,
-            'cross_entropy_loss': self.cross_entropy_loss,
-            'dual_unbiased_loss': self.dual_unbiased_loss
+            'original': self.original_loss,
+            'cross_entropy': self.cross_entropy_loss,
+            'dual_unbiased': self.dual_unbiased_loss
         }
 
         if loss_function in loss_func_mapping:
@@ -150,7 +150,7 @@ class PairwiseRecommender(AbstractRecommender):
     lam: float = 1e-4
     eta: float = 0.005
     beta: float = 0.0
-    loss_function: str = 'paper_loss'
+    loss_function: str = 'original'
 
     def __post_init__(self) -> None:
         """Initialize Class."""
@@ -170,7 +170,7 @@ class PairwiseRecommender(AbstractRecommender):
         self.rel1 = tf.placeholder(tf.float32, [None, 1], name='rel_ph1')
         self.rel2 = tf.placeholder(tf.float32, [None, 1], name='rel_ph2')
 
-        if self.loss_function == 'dual_unbiased_loss':
+        if self.loss_function == 'dual_unbiased':
             # New parameters
             #self.labels1 = tf.placeholder(tf.float32, [None, 1], name='label_ph1')
             self.scores1_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
@@ -194,7 +194,7 @@ class PairwiseRecommender(AbstractRecommender):
             self.preds2 = tf.reduce_sum(tf.multiply(self.u_embed, self.i_embed2), 1)
             self.preds = tf.sigmoid(tf.expand_dims(self.preds1 - self.preds2, 1))
     
-    def paper_loss(self):
+    def original_loss(self):
         """ The original pairwise loss from the paper """
         with tf.name_scope('losses'):
             # define the naive pairwise loss.
@@ -228,8 +228,8 @@ class PairwiseRecommender(AbstractRecommender):
         """Create the losses."""
         """Create the losses."""
         loss_func_mapping = {
-            'paper_loss': self.paper_loss,
-            'dual_unbiased_loss': self.dual_unbiased_loss
+            'original': self.original_loss,
+            'dual_unbiased': self.dual_unbiased_loss
         }
 
         if loss_function in loss_func_mapping:

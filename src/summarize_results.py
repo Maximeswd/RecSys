@@ -17,13 +17,13 @@ col_names = [f'{m}@{k}' for m in metrics for k in K]
 rel_col_names = [f'{m}@5' for m in metrics]
 
 
-def summarize_results(data: str, path: Path) -> None:
+def summarize_results(data: str, path: Path, propensity) -> None:
     """Load and save experimental results."""
     suffixes = ['all'] if data == 'coat' else ['cold-user', 'rare-item', 'all']
     for suffix in suffixes:
         aoa_list = []
         for model in all_models:
-            file = f'../logs/{data}/{model}/results/aoa_{suffix}.csv'
+            file = f'../logs/{data}/{propensity}/{model}/results/aoa_{suffix}.csv'
             aoa_list.append(pd.read_csv(file, index_col=0).mean(1))
         results_df = pd.concat(aoa_list, 1).round(7).T
         results_df.index = all_models
@@ -32,12 +32,14 @@ def summarize_results(data: str, path: Path) -> None:
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--datasets', '-d', required=True, nargs='*', type=str, choices=['coat', 'yahoo'])
+parser.add_argument('--propensity', '-p', nargs='+', type=str, required=True, choices=['original', 'bb-item', 'bb-item-user'])
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     args = parser.parse_args()
 
     for data in args.datasets:
-        path = Path(f'../paper_results/{data}')
-        path.mkdir(parents=True, exist_ok=True)
-        summarize_results(data=data, path=path)
+        for propensity in args.propensity:
+            path = Path(f'../paper_results/{data}/{propensity}')
+            path.mkdir(parents=True, exist_ok=True)
+            summarize_results(data=data, path=path, propensity=propensity)
