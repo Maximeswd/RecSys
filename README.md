@@ -25,33 +25,51 @@ First, install the dependencies by running:
 ```bash
 conda env create -f environment.yml
 ```
-To preprocess the datasets, navigate to the `src/` directory and run the command
+To preprocess the datasets, navigate to the `src/` directory and run the command. the -p command runs the preprocessing for multiple propensity estimations.
 
 ```bash
-python preprocess_datasets.py -d coat yahoo
+python preprocess_datasets.py -d coat yahoo -p original bb-item bb-item-user
 ```
 
-Then, run the following command in the same directory to reproduce the results from the paper: Unbiased Pairwise Learning from Biased Implicit Feedback By Saito
+Then, run the following command in the same directory to reproduce the results from the paper: Unbiased Pairwise Learning from Biased Implicit Feedback By Saito.
 
 ```bash
-python run.py -d  coat -m wmf expomf relmf bpr ubpr ip --pointwise_loss paper_loss --pairwise_loss paper_loss
+python run.py -d  coat -m wmf expomf relmf bpr ubpr ip --pointwise_loss original --pairwise_loss original -p original -r 10
 ```
-
-To reproduce the results for the methods DUMF and DUBPR, run: 
+To run the original models with different propensity estimations:
 
 ```bash
-srun python run.py -d  coat -m dumf dubpr --pointwise_loss dual_unbiased_loss --pairwise_loss dual_unbiased_loss
+python run.py -d  coat -m wmf expomf relmf bpr ubpr ip --pointwise_loss original --pairwise_loss original -p bb-item bb-item-user -r 10
 ```
 
-This will run real-world experiments conducted in Section 4.
+To reproduce the results for the methods DUMF and DUBPR with the different propensity estimations, run: 
+
+```bash
+python run.py -d  coat -m dumf dubpr --pointwise_loss dual_unbiased --pairwise_loss dual_unbiased -p original bb-item bb-item-user -r 10
+```
 
 After running the experiments, you can summarize the results by running the following command in the `src/` directory.
 
 ```bash
-python summarize_results.py -d yahoo coat
+python summarize_results.py -d yahoo coat -p original bb-item bb-item-user
 ```
 
 Once the code is finished executing, you can find the summarized results in `./paper_results/` directory.
+
+### Running on cluster
+Additionally, we made scripts to make the code executable on a cluster. Redirect to 'scripts/' directory and change the srun command to the desired preprocess step as described above.
+The command to run the script is:
+```bash
+sbatch preprocess.job
+```
+Similarly, change the command after srun in run.job to run the experiments:
+```bash
+sbatch run.job
+```
+Finally, change the command after srun in summarize.job to summarize the experiments:
+```bash
+sbatch summarize.job
+```
 
 
 ### Acknowledgement
