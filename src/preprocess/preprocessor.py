@@ -145,9 +145,10 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind :str):
         BB_estimates_combi = []
         for user in range(num_users):
             for item in range(num_items):
-                
+
+                BB_estimates_combi.append((0.55 * BB_estimates_user[user]) * (0.45 * BB_estimates_item[item]))
                 # BB_estimates_combi.append(BB_estimates_user[user] * BB_estimates_item[item])
-                BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]))
+                # BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]))
                 
         # Normalize the probability estimates
         BB_estimates_combi = np.array(BB_estimates_combi) / np.sum(BB_estimates_combi)
@@ -321,26 +322,33 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int, propensity: str)
 
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
 
+
 def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int, propensity: str) -> np.ndarray:
     """Generate training data for the dual unbiased bpr."""
-   
+    
     if propensity == 'bb-item-user':
         # Put the data into a dataframe
         data2 = pd.DataFrame(data, columns=['user', 'item', 'click'])
 
         # Only select the rows of df that match the rows of data2 
+        train_df['theta_n'] = nscore
         df = pd.merge(train_df, data2, on=['user', 'item', 'click'], how='inner')
-        df['theta_n'] = nscore
         df.columns = ['user', 'item', 'click', 'theta_p', 'theta_n']
-
-    elif propensity in ['bb-item', 'original']:
+    
+    elif propensity == 'bb-item':
         data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
         df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
-   
+    
+    elif propensity == 'original':
+        data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
+        df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
+    
     else:
         raise ValueError(f"Invalid propensity method: {propensity}")
     
+    
     positive = df.query("click == 1")
+
     ret = positive.merge(df, on="user")\
         .sample(frac=1, random_state=12345)\
         .groupby(["user", "item_x"])\
@@ -348,7 +356,6 @@ def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: 
     ret = ret[ret["item_x"] != ret["item_y"]]
 
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_p_x', 'theta_p_y', 'theta_n_x', 'theta_n_y']].values
-
 
 if __name__ == "__main__":
     
