@@ -323,6 +323,7 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int, propensity: str)
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
 
 
+
 def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int, propensity: str) -> np.ndarray:
     """Generate training data for the dual unbiased bpr."""
     
@@ -336,11 +337,11 @@ def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: 
         df.columns = ['user', 'item', 'click', 'theta_p', 'theta_n']
     
     elif propensity == 'bb-item':
-        data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
+        data = np.c_[data, np.array(pscore)[data[:, 1].astype(int)], np.array(nscore)[data[:, 1].astype(int)]]
         df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
     
     elif propensity == 'original':
-        data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
+        data = np.c_[data, np.array(pscore)[data[:, 1].astype(int)], np.array(nscore)[data[:, 1].astype(int)]]
         df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
     
     else:
