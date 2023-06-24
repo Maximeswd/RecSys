@@ -20,6 +20,7 @@ from models.recommenders import PairwiseRecommender, PointwiseRecommender
 def train_ip(num_users: int, num_items: int, scores: np.ndarray, propensity:str, data:str) -> Tuple:
     """ Calculate the ItemPop"""
 
+    # Change scores to bb-item if bb-item-user, because ip does not take users into account 
     if propensity == 'bb-item-user':
         scores = np.load(f"../data/{data}/bb-item/point/pscore.npy")
     return np.ones(shape=(num_users, 1)), scores.reshape(num_items, 1)
@@ -100,7 +101,7 @@ def train_pointwise(
     num_unlabeled = np.sum(1 - train[:, 2])
     
     # train the given implicit recommender
-    np.random.seed(12345)  # TODO random seed is not in loop
+    np.random.seed(12345)  
     for i in np.arange(max_iters):
         # positive mini-batch sampling
         # the same num. of postive and negative samples are used in each batch

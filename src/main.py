@@ -38,7 +38,7 @@ if __name__ == "__main__":
         )
     trainer.run(num_sims=args.run_sims)
 
-    # # debug variant
+    # debug variant
     # warnings.filterwarnings("ignore")
     # tf.get_logger().setLevel("ERROR")
     
@@ -48,10 +48,10 @@ if __name__ == "__main__":
     #     batch_size=config['batch_size'],
     #     max_iters=config['max_iters'],
     #     eta=config['eta'],
-    #     model_name='ip',
+    #     model_name='dubpr',
     #     pointwise_loss='dual_unbiased',
     #     pairwise_loss='dual_unbiased',
-    #     propensity='bb-item-user'
+    #     propensity='original'
     # )
     # trainer.run(num_sims=1)
 

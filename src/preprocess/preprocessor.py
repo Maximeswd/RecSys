@@ -251,14 +251,14 @@ def preprocess_dataset(data: str, propensity: str):
     # pairwise
     samples = 10
     bpr_train = _bpr(data=train, n_samples=samples)
-    ubpr_train = _ubpr(data=train, pscore=pscore, n_samples=samples)
+    ubpr_train = _ubpr(data=train, pscore=pscore, n_samples=samples, propensity=propensity)
     bpr_val = _bpr(data=val, n_samples=samples)
-    ubpr_val = _ubpr(data=val, pscore=pscore, n_samples=samples)
+    ubpr_val = _ubpr(data=val, pscore=pscore, n_samples=samples, propensity=propensity)
     pair_test = _bpr_test(data=test, n_samples=samples)
 
     # New model 
-    dubpr_train = _dubpr(data=train, n_samples=samples, pscore=pscore, nscore=nscore)
-    dubpr_val = _dubpr(data=val, n_samples=samples, pscore=pscore, nscore=nscore) 
+    dubpr_train = _dubpr(data=train, n_samples=samples, pscore=pscore, nscore=nscore, propensity=propensity)
+    dubpr_val = _dubpr(data=val, n_samples=samples, pscore=pscore, nscore=nscore, propensity=propensity) 
 
     np.save(file=path_data / 'pair/bpr_train.npy', arr=bpr_train)
     np.save(file=path_data / 'pair/ubpr_train.npy', arr=ubpr_train)
@@ -295,11 +295,23 @@ def _bpr_test(data: np.ndarray, n_samples: int) -> np.ndarray:
     return ret[['user', 'item_x', 'item_y', 'gamma_x', 'gamma_y']].values
 
 
-def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
+def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int, propensity: str) -> np.ndarray:
     """Generate training data for the unbiased bpr."""
 
-    data = np.c_[data, pscore[data[:, 1].astype(int)]]
-    df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta'])
+    if propensity == 'bb-item-user':
+    # Put the data into a dataframe
+        data2 = pd.DataFrame(data, columns=['user', 'item', 'click'])
+
+        # Only select the rows of df that match the rows of data2 
+        df = pd.merge(train_df, data2, on=['user', 'item', 'click'], how='inner')
+
+    elif propensity in ['bb-item', 'original']:
+        data = np.c_[data, pscore[data[:, 1].astype(int)]]
+        df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta'])
+
+    else:
+        raise ValueError(f"Invalid propensity method: {propensity}")
+        
     positive = df.query("click == 1")
     ret = positive.merge(df, on="user")\
         .sample(frac=1, random_state=12345)\
@@ -309,12 +321,26 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int) -> np.ndarray:
 
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
 
-def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int) -> np.ndarray:
+def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int, propensity: str) -> np.ndarray:
     """Generate training data for the dual unbiased bpr."""
-    data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
-    df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
-    positive = df.query("click == 1")
+   
+    if propensity == 'bb-item-user':
+        # Put the data into a dataframe
+        data2 = pd.DataFrame(data, columns=['user', 'item', 'click'])
 
+        # Only select the rows of df that match the rows of data2 
+        df = pd.merge(train_df, data2, on=['user', 'item', 'click'], how='inner')
+        df['theta_n'] = nscore
+        df.columns = ['user', 'item', 'click', 'theta_p', 'theta_n']
+
+    elif propensity in ['bb-item', 'original']:
+        data = np.c_[data, pscore[data[:, 1].astype(int)], nscore[data[:, 1].astype(int)]]
+        df = pd.DataFrame(data, columns=['user', 'item', 'click', 'theta_p', 'theta_n'])
+   
+    else:
+        raise ValueError(f"Invalid propensity method: {propensity}")
+    
+    positive = df.query("click == 1")
     ret = positive.merge(df, on="user")\
         .sample(frac=1, random_state=12345)\
         .groupby(["user", "item_x"])\
@@ -327,7 +353,7 @@ def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: 
 if __name__ == "__main__":
     
     data = 'coat'
-    propensity = 'bb-item-user'
+    propensity = 'original'
     preprocess_dataset(data=data, propensity=propensity)
 
     print('\n', '=' * 25, '\n')
