@@ -1,8 +1,0 @@
-WARNING:tensorflow:From /home/lcur2421/recsys/src/trainer.py:72: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
-
-2023-06-20 16:31:14.210625: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
-2023-06-20 16:31:14.234223: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
-2023-06-20 16:31:14.234390: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x560018e94960 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
-2023-06-20 16:31:14.234400: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** JOB 11932761 ON r38n2 CANCELLED AT 2023-06-20T16:31:15 ***

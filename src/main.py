@@ -44,13 +44,14 @@ if __name__ == "__main__":
     
     # config = yaml.safe_load(open('../RecSys/conf/config.yaml', 'rb'))
     # trainer = Trainer(
-    #     data='yahoo',
+    #     data='coat',
     #     batch_size=config['batch_size'],
     #     max_iters=config['max_iters'],
     #     eta=config['eta'],
-    #     model_name='dumf',
-    #     pointwise_loss='dual_unbiased_loss',
-    #     pairwise_loss='dual_unbiased_loss'
+    #     model_name='ip',
+    #     pointwise_loss='dual_unbiased',
+    #     pairwise_loss='dual_unbiased',
+    #     propensity='bb-item-user'
     # )
     # trainer.run(num_sims=1)
 

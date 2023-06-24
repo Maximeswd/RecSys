@@ -12,8 +12,6 @@ import pandas as pd
 from scipy import sparse
 from sklearn.model_selection import train_test_split
 from scipy.stats import beta, binom
-import matplotlib.pyplot as plt
-
 
 def transform_rating(ratings: np.ndarray, eps: float = 0.1) -> np.ndarray:
     """ Transform ratings into graded relevance information."""
@@ -78,7 +76,7 @@ def mm_est(x, n):
 
 # Oui, bernoulli
 
-def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'bb-user'):
+def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind :str):
     """
     Emperical Bayesian Estimation of Beta-Binomial (BB) for implicit feedback data.
     """
@@ -89,32 +87,7 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind = 'bb-use
     # Put train into dataframe with columns user, item, rate and make all values integers
     train_df = pd.DataFrame(data, columns=['user', 'item', 'rate']).astype(int)
 
-    if kind == 'user_est':
-        # Get the number of total clicks per user
-        num_clicks_user = train_df.groupby('user')['rate'].sum().values
-        
-        # Each user, could've clicked on each item, so we get the total number of impressions per user
-        num_impres_user = np.full(num_users, num_items)  
-        
-        # Get the estimates of the beta distribution parameters over all users
-        alpha, beta = mm_est(num_clicks_user, num_impres_user)
-        
-        # Get the estimates of the beta distribution parameters for each user
-        BB_estimates = []
-        for y, n in zip(num_clicks_user, num_impres_user):
-            theta = (y + alpha) / (n + alpha + beta)
-            BB_estimates.append(theta)
-    
-        # Normalize the probability estimates
-        BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)
-        
-        # Delete the dataframe to save memory
-        del train_df
-    
-        # return alpha, beta, BB_estimates
-        return BB_estimates
-
-    elif kind == 'item_est':
+    if kind == 'item_est':
         
         # Get the number of total clicks per user
         num_clicks_item = train_df.groupby('item')['rate'].sum().values

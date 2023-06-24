@@ -17,7 +17,11 @@ from models.expomf import ExpoMF
 from models.recommenders import PairwiseRecommender, PointwiseRecommender
 
 
-def train_ip(num_users: int, num_items: int, scores: np.ndarray,) -> Tuple:
+def train_ip(num_users: int, num_items: int, scores: np.ndarray, propensity:str, data:str) -> Tuple:
+    """ Calculate the ItemPop"""
+
+    if propensity == 'bb-item-user':
+        scores = np.load(f"../data/{data}/bb-item/point/pscore.npy")
     return np.ones(shape=(num_users, 1)), scores.reshape(num_items, 1)
 
 def train_expomf(
@@ -419,7 +423,7 @@ class Trainer:
                     num_items=num_items,
                 )
             elif self.model_name == "ip":
-                u_emb, i_emb = train_ip(num_users=num_users, num_items=num_items, scores=pscore)
+                u_emb, i_emb = train_ip(num_users=num_users, num_items=num_items, scores=pscore, propensity=self.propensity, data=self.data)
 
             result = aoa_evaluator(
                 user_embed=u_emb,
