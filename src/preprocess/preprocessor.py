@@ -71,18 +71,12 @@ def mm_est(x, n):
     
     return alpha, beta
 
-# prior as avg across all user item pairs, count estimate each pair based on that 
-# if we have perfect propensities, how does it perform? And does it perform extremely better?
-
-# Oui, bernoulli
-
 
 def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind: str):
     
     """
     Emperical Bayesian Estimation of Beta-Binomial (BB) for implicit feedback data.
     """
-    
     
     # Save the train_df as a global variable
     global train_df
@@ -110,9 +104,6 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind: str):
         # Normalize the probability estimates
         BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)
     
-        # Delete the dataframe to save memory
-        # del train_df
-        
         # return alpha, beta, BB_estimates
         return BB_estimates
 
@@ -133,9 +124,6 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind: str):
             theta = (y + alpha) / (n + alpha + beta)
             BB_estimates.append(theta)
 
-        # Delete the dataframe to save memory
-        # del train_df
-        
         # Normalize the probability estimates
         BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)   
         
@@ -170,20 +158,11 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind: str):
             theta = (y + alpha_item) / (n + alpha_item + beta_item)
             BB_estimates_item.append(theta)
             
-        # Normalize the probability estimates: makes performance worse, since we normalize twice
-        # BB_estimates_user = np.array(BB_estimates_user) / np.sum(BB_estimates_user)
-        # BB_estimates_item = np.array(BB_estimates_item) / np.sum(BB_estimates_item)
-        
         # loop through all user item pairs and get the combined estimate
         BB_estimates_combi = []
         for user in range(num_users):
             for item in range(num_items):
-                
-                # BB_estimates_combi.append(BB_estimates_user[user] * BB_estimates_item[item])
                 BB_estimates_combi.append((0.55 * BB_estimates_user[user]) * (0.45 * BB_estimates_item[item]))
-                # BB_estimates_combi.append((weight_factor * BB_estimates_item[item]) + ((1 - weight_factor) * BB_estimates_user[user]))
-                # BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]))
-                # BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]) / 2)
                 
         # Normalize the probability estimates
         BB_estimates_combi = np.array(BB_estimates_combi) / np.sum(BB_estimates_combi)
@@ -396,7 +375,7 @@ def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: 
 if __name__ == "__main__":
     
     data = 'coat'
-    propensity = 'original'
+    propensity = 'bb-item-user'
     preprocess_dataset(data=data, propensity=propensity)
 
     print('\n', '=' * 25, '\n')
