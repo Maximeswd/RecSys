@@ -44,7 +44,7 @@ def train_expomf(
             matrix[u, i] = r
         return sparse.csr_matrix(matrix)
 
-    path = Path(f"../logs/{data}/{propensity}expomf/emb")
+    path = Path(f"../logs/{data}/{propensity}/expomf/emb")
     path.mkdir(parents=True, exist_ok=True)
     model = ExpoMF(
         n_components=n_components,

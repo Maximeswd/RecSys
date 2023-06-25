@@ -70,7 +70,7 @@ if __name__ == "__main__":
                 print(study.best_params)
 
                 print("\n", "=" * 25, "\n")
-                print(f"Finished tuning {args.model_name} with propensity estimation {args.propensity}!")
+                print(f"Finished tuning {model} with propensity estimation {propensity}!")
                 print("\n", "=" * 25, "\n")
 
 

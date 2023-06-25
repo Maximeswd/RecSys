@@ -4,8 +4,8 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=fat_soil_shared
 #SBATCH --time=04:00:00
-#SBATCH --output=tune_yahoo.out
-#SBATCH --error=tune_yahoo.job.err
+#SBATCH --output=tune.out
+#SBATCH --error=tune.err
 
 module purge
 module load 2021
@@ -14,4 +14,4 @@ module load Anaconda3/2021.05
 cd $HOME/recsys/src
 source activate recsys
 
-srun python tune.py -m dubpr -d coat --run_sims 30
+srun python tune.py -m dumf dubpr -d coat yahoo --run_sims 10 -p original bb-item bb-item-user
