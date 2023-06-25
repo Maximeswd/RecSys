@@ -172,7 +172,6 @@ class PairwiseRecommender(AbstractRecommender):
 
         if self.loss_function == 'dual_unbiased':
             # New parameters
-            #self.labels1 = tf.placeholder(tf.float32, [None, 1], name='label_ph1')
             self.scores1_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
             self.scores1_n = tf.placeholder(tf.float32, [None, 1], name='score_n')
             self.scores2_p = tf.placeholder(tf.float32, [None, 1], name='score_p')
