@@ -76,21 +76,50 @@ def mm_est(x, n):
 
 # Oui, bernoulli
 
-def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind :str):
+
+def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind: str):
+    
     """
     Emperical Bayesian Estimation of Beta-Binomial (BB) for implicit feedback data.
     """
-
+    
+    
     # Save the train_df as a global variable
     global train_df
     
     # Put train into dataframe with columns user, item, rate and make all values integers
-    train_df = pd.DataFrame(data, columns=['user', 'item', 'rate']).astype(int)
+    train_df = pd.DataFrame(data, columns=['user', 'item', 'click']).astype(int)
 
-    if kind == 'item_est':
+    if kind == 'user_est':
         
         # Get the number of total clicks per user
-        num_clicks_item = train_df.groupby('item')['rate'].sum().values
+        num_clicks_user = train_df.groupby('user')['click'].sum().values
+        
+        # Each user, could've clicked on each item, so we get the total number of impressions per user
+        num_impres_user = np.full(num_users, num_items)  
+        
+        # Get the estimates of the beta distribution parameters over all users
+        alpha, beta = mm_est(num_clicks_user, num_impres_user)
+        
+        # Get the estimates of the beta distribution parameters for each user
+        BB_estimates = []
+        for y, n in zip(num_clicks_user, num_impres_user):
+            theta = (y + alpha) / (n + alpha + beta)
+            BB_estimates.append(theta)
+
+        # Normalize the probability estimates
+        BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)
+    
+        # Delete the dataframe to save memory
+        # del train_df
+        
+        # return alpha, beta, BB_estimates
+        return BB_estimates
+
+    elif kind == 'item_est':
+        
+        # Get the number of total clicks per user
+        num_clicks_item = train_df.groupby('item')['click'].sum().values
         
         # Each user, could've clicked on each item, so we get the total number of impressions per user
         num_impres_item = np.full(num_items, num_users)  
@@ -103,9 +132,9 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind :str):
         for y, n in zip(num_clicks_item, num_impres_item):
             theta = (y + alpha) / (n + alpha + beta)
             BB_estimates.append(theta)
-        
+
         # Delete the dataframe to save memory
-        del train_df
+        # del train_df
         
         # Normalize the probability estimates
         BB_estimates = np.array(BB_estimates) / np.sum(BB_estimates)   
@@ -113,12 +142,12 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind :str):
         return BB_estimates
 
     elif kind == 'combi':
-    
-        # Get the number of total clicks per user
-        num_clicks_user = train_df.groupby('user')['rate'].sum().values
         
         # Get the number of total clicks per user
-        num_clicks_item = train_df.groupby('item')['rate'].sum().values
+        num_clicks_user = train_df.groupby('user')['click'].sum().values
+        
+        # Get the number of total clicks per user
+        num_clicks_item = train_df.groupby('item')['click'].sum().values
         
         # Each user, could've clicked on each item, so we get the total number of impressions per user
         num_impres_user = np.full(num_users, num_items)  
@@ -136,25 +165,31 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind :str):
         for y, n in zip(num_clicks_user, num_impres_user):
             theta = (y + alpha_user) / (n + alpha_user + beta_user)
             BB_estimates_user.append(theta)
-    
+
         for y, n in zip(num_clicks_item, num_impres_item):
             theta = (y + alpha_item) / (n + alpha_item + beta_item)
             BB_estimates_item.append(theta)
+            
+        # Normalize the probability estimates: makes performance worse, since we normalize twice
+        # BB_estimates_user = np.array(BB_estimates_user) / np.sum(BB_estimates_user)
+        # BB_estimates_item = np.array(BB_estimates_item) / np.sum(BB_estimates_item)
         
         # loop through all user item pairs and get the combined estimate
         BB_estimates_combi = []
         for user in range(num_users):
             for item in range(num_items):
-
-                BB_estimates_combi.append((0.55 * BB_estimates_user[user]) * (0.45 * BB_estimates_item[item]))
+                
                 # BB_estimates_combi.append(BB_estimates_user[user] * BB_estimates_item[item])
+                BB_estimates_combi.append((0.55 * BB_estimates_user[user]) * (0.45 * BB_estimates_item[item]))
+                # BB_estimates_combi.append((weight_factor * BB_estimates_item[item]) + ((1 - weight_factor) * BB_estimates_user[user]))
                 # BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]))
+                # BB_estimates_combi.append((BB_estimates_user[user] + BB_estimates_item[item]) / 2)
                 
         # Normalize the probability estimates
         BB_estimates_combi = np.array(BB_estimates_combi) / np.sum(BB_estimates_combi)
         
         # Delete the dataframe to save memory
-        del train_df
+        train_df['theta'] = BB_estimates_combi
         
         return BB_estimates_combi
 
