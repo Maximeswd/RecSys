@@ -15,4 +15,4 @@ module load Anaconda3/2021.05
 cd $HOME/recsys/src
 source activate recsys
 
-srun python tune.py -m dumf dubpr -d coat yahoo --run_sims 10 -p original bb-item bb-item-user
+srun python tune.py -m wmf relmf bpr ubpr dumf dubpr -d coat --run_sims 1 -p original bb-item bb-item-user

@@ -1,38 +1,6 @@
-WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:77: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+WARNING:tensorflow:From /home/lcur2421/recsys/src/trainer.py:97: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
 
-2023-06-25 11:38:42.371154: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
-2023-06-25 11:38:42.394466: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
-2023-06-25 11:38:42.394924: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x5644df158e40 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
-2023-06-25 11:38:42.394957: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
-WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:77: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+WARNING:tensorflow:From /home/lcur2421/recsys/src/trainer.py:97: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
 
-2023-06-25 11:49:35.829292: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
-2023-06-25 11:49:35.854471: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
-2023-06-25 11:49:35.854969: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x56454911a820 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
-2023-06-25 11:49:35.855003: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
-WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:77: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+WARNING:tensorflow:From /home/lcur2421/recsys/src/trainer.py:97: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
 
-2023-06-25 12:00:10.597105: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
-2023-06-25 12:00:10.622479: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
-2023-06-25 12:00:10.622952: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x56046c746a40 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
-2023-06-25 12:00:10.622984: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
-WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:77: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
-
-2023-06-25 12:11:04.989004: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
-2023-06-25 12:11:05.010469: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
-2023-06-25 12:11:05.010934: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55b02c892d60 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
-2023-06-25 12:11:05.010968: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
-WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:77: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
-
-2023-06-25 12:39:04.340901: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
-2023-06-25 12:39:04.366484: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
-2023-06-25 12:39:04.366978: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x561f8088ecf0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
-2023-06-25 12:39:04.367010: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
-WARNING:tensorflow:From /home/lcur2441/recsys/src/trainer.py:79: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
-
-2023-06-25 13:06:45.658874: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: AVX2 AVX512F FMA
-2023-06-25 13:06:45.682449: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2100000000 Hz
-2023-06-25 13:06:45.682913: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x5629dcf4dd70 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
-2023-06-25 13:06:45.682946: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** JOB 11936125 ON r38n2 CANCELLED AT 2023-06-25T13:10:13 ***

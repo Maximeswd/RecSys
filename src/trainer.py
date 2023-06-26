@@ -358,11 +358,8 @@ class Trainer:
             self.dim = np.int(hyper_params["dim"])
             self.lam = hyper_params["lam"]
             self.weight = hyper_params["weight"] if model_name == "wmf" else 1.0
-            # TODO this is adjusted for dumf and ubpr
-            # self.clip = hyper_params["clip"] if model_name in ["relmf", 'dumf'] else 0.0
-            # self.beta = hyper_params["beta"] if model_name in ["ubpr", "dubpr"] else 0.0
-            self.clip = hyper_params["clip"] if model_name == "relmf" else 0.0
-            self.beta = hyper_params["beta"] if model_name == "ubpr" else 0.0
+            self.clip = hyper_params["clip"] if model_name in ["relmf", 'dumf'] else 0.0
+            self.beta = hyper_params["beta"] if model_name in ["ubpr", "dubpr"] else 0.0
         self.batch_size = batch_size
         self.max_iters = max_iters
         self.eta = eta
