@@ -2,8 +2,11 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --partition=shared
+#SBATCH --partition=fat_soil_shared
 #SBATCH --time=01:00:00
+#SBATCH --output=remove.out
+#SBATCH --error=remove.err
+
 
 module purge
 module load 2021

@@ -94,7 +94,7 @@ class Tuner:
                     loss_function='dual_unbiased'
                 )
 
-                u_emb, i_emb, _ = train_pairwise(
+                u_emb, i_emb, val_loss = train_pairwise(
                     sess,
                     model=pair_rec,
                     data=self.data,

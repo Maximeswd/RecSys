@@ -7,6 +7,7 @@
 #SBATCH --output=summarize.out
 #SBATCH --error=summarize.err
 
+
 module purge
 module load 2021
 module load Anaconda3/2021.05
@@ -14,4 +15,4 @@ module load Anaconda3/2021.05
 cd $HOME/recsys/src
 source activate recsys
 
-srun python summarize_results.py -d coat yahoo -p original bb-item bb-item-user
+srun python summarize_results.py -d coat -p original bb-item bb-item-user

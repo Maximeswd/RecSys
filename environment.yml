@@ -14,9 +14,11 @@ dependencies:
   - pyyaml=5.1.2
   - protobuf=3.20.3
   - optuna=3.2.0
- 
+  - cudatoolkit=10.0
+  - cudnn=7.6
+  - scipy
   - pip:
-    - tensorflow==1.15.2
+    - tensorflow-gpu==1.15.2
 
 
 

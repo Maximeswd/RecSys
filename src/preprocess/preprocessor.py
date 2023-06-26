@@ -6,6 +6,9 @@ Extended with the code from a "Reproducibility study: Unbiased Pairwise Learning
 import codecs
 from pathlib import Path
 import itertools
+import csv
+
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -207,6 +210,10 @@ def preprocess_dataset(data: str, propensity: str):
 
     # extract only positive (relevant) user-item pairs
     train = train[rel_train == 1, :2]
+
+    # preprocess for ngcf
+    ngcf_train, ngcf_test = _ngcf(train)
+
     # Creating training data
     all_data = pd.DataFrame(np.zeros((num_users, num_items))).stack().reset_index().values[:, :2]
     unlabeled_data = np.array(list(set(map(tuple, all_data)) - set(map(tuple, train))), dtype=int)
@@ -254,6 +261,8 @@ def preprocess_dataset(data: str, propensity: str):
     path_data = Path(f'../data/{data}/{propensity}')
     (path_data / 'point').mkdir(parents=True, exist_ok=True)
     (path_data / 'pair').mkdir(parents=True, exist_ok=True)
+    (path_data / 'ngcf').mkdir(parents=True, exist_ok=True)
+    
     # pointwise
     np.save(file=path_data / 'point/train.npy', arr=train.astype(int))
     np.save(file=path_data / 'point/val.npy', arr=val.astype(int))
@@ -271,6 +280,11 @@ def preprocess_dataset(data: str, propensity: str):
     ubpr_val = _ubpr(data=val, pscore=pscore, n_samples=samples, propensity=propensity)
     pair_test = _bpr_test(data=test, n_samples=samples)
 
+    #ngcf 
+    ngcf_train.to_csv(path_data / 'ngcf/train.txt', index=False, header=False, quoting=csv.QUOTE_NONE, escapechar='')
+    ngcf_test.to_csv(path_data / 'ngcf/test.txt', index=False, header=False, quoting=csv.QUOTE_NONE, escapechar='')
+
+
     # New model 
     dubpr_train = _dubpr(data=train, n_samples=samples, pscore=pscore, nscore=nscore, propensity=propensity)
     dubpr_val = _dubpr(data=val, n_samples=samples, pscore=pscore, nscore=nscore, propensity=propensity) 
@@ -284,6 +298,16 @@ def preprocess_dataset(data: str, propensity: str):
     # Save new model
     np.save(file=path_data / 'pair/dubpr_train.npy', arr=dubpr_train)
     np.save(file=path_data / 'pair/dubpr_val.npy', arr=dubpr_val)
+
+
+def _ngcf(data: np.ndarray) -> Tuple:
+    def group_items_by_user(data: np.ndarray) -> pd.Series:
+        df = pd.DataFrame(data, columns = ['user','item'])
+        df = df.groupby('user').agg({'item': lambda x: ' '.join(map(str, x))}).reset_index()
+        df['row'] = df['user'].astype(str) + ' ' + df['item']
+        return df['row']
+    train, test = train_test_split(data, test_size=0.1, random_state=12345)
+    return group_items_by_user(train), group_items_by_user(test)
 
 
 def _bpr(data: np.ndarray, n_samples: int) -> np.ndarray:

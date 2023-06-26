@@ -14,8 +14,24 @@ from tensorflow.python.framework import ops
 
 from evaluate.evaluator import aoa_evaluator
 from models.expomf import ExpoMF
+from models.ngcf import train
 from models.recommenders import PairwiseRecommender, PointwiseRecommender
 
+
+def train_ngcf(data: str, seed) -> Tuple:
+    data_path = f"../data/{data}/ngcf/"
+    return train(
+        data_path=data_path,
+        regs="[1e-5]",
+        embed_size=64,
+        layer_size="[64, 64, 64]",
+        lr=0.0001,
+        batch_size=128,
+        epoch=500,
+        verbose=1,
+        node_dropout="[0.1]",
+        mess_dropout="[0.1, 0.1, 0.1]",
+    )
 
 def train_ip(num_users: int, num_items: int, scores: np.ndarray, propensity:str, data:str) -> Tuple:
     """ Calculate the ItemPop"""
@@ -32,7 +48,8 @@ def train_expomf(
     num_items: int,
     n_components: int = 100,
     lam: float = 1e-6,
-    propensity: str = 'original'
+    propensity: str = 'original',
+    seed:int = 12345
     
 ) -> Tuple:
     """Train the expomf model."""
@@ -48,7 +65,7 @@ def train_expomf(
     path.mkdir(parents=True, exist_ok=True)
     model = ExpoMF(
         n_components=n_components,
-        random_state=12345,
+        random_state=seed,
         save_params=False,
         early_stopping=True,
         verbose=False,
@@ -76,7 +93,8 @@ def train_pointwise(
     model_name: str = "wmf",
     is_optuna: bool = False,
     loss = str,
-    propensity: str = 'original'
+    propensity: str = 'original',
+    seed:int = 12345
 ) -> Tuple:
     """Train and evaluate implicit recommender."""
     train_loss_list = []
@@ -103,7 +121,7 @@ def train_pointwise(
     num_unlabeled = np.sum(1 - train[:, 2])
     
     # train the given implicit recommender
-    np.random.seed(12345)  
+    np.random.seed(seed)  
     for i in np.arange(max_iters):
         # positive mini-batch sampling
         # the same num. of postive and negative samples are used in each batch
@@ -184,7 +202,9 @@ def train_pairwise(
     batch_size: int = 1024,
     model_name: str = "bpr",
     is_optuna: bool = False,
-    propensity:str = 'original'
+    propensity:str = 'original',
+    seed:int = 12345
+
 ) -> Tuple:
     """Train and evaluate pairwise recommenders."""
     train_loss_list = []
@@ -196,7 +216,7 @@ def train_pairwise(
 
     # count the num of training data.
     num_train, num_val = train.shape[0], val.shape[0]
-    np.random.seed(12345)
+    np.random.seed(seed)
     for i in np.arange(max_iters):
         idx = np.random.choice(np.arange(num_train), size=batch_size)
         train_batch = train[idx]
@@ -331,7 +351,7 @@ class Trainer:
         self.pairwise_loss = pairwise_loss
         self.propensity = propensity
 
-        if model_name not in ["expomf", "ip"]:
+        if model_name not in ["expomf", "ip", "ngcf"]:
             hyper_params = yaml.safe_load(open(f"../conf/hyper_params.yaml", "r"))[
                 data
             ][model_name]
@@ -371,8 +391,11 @@ class Trainer:
             cold_user_result_list = list()
             rare_item_result_list = list()
         for seed in np.arange(num_sims):
-            tf.set_random_seed(12345) # TODO set seed to random 
             ops.reset_default_graph()
+
+            tf.set_random_seed(seed)
+            np.random.seed(seed)
+            
             sess = tf.Session()
             if self.model_name in ["ubpr", "bpr", "dubpr"]:
                 pair_rec = PairwiseRecommender(
@@ -394,7 +417,8 @@ class Trainer:
                     max_iters=self.max_iters,
                     batch_size=self.batch_size,
                     model_name=self.model_name,
-                    propensity=self.propensity
+                    propensity=self.propensity,
+                    seed=seed
                 )
             elif self.model_name in ["wmf", "relmf", "dumf"]:
                 point_rec = PointwiseRecommender(
@@ -419,7 +443,8 @@ class Trainer:
                     max_iters=self.max_iters,
                     batch_size=self.batch_size,
                     model_name=self.model_name,
-                    propensity=self.propensity
+                    propensity=self.propensity,
+                    seed=seed
                 )
             elif self.model_name == "expomf":
                 u_emb, i_emb = train_expomf(
@@ -427,7 +452,8 @@ class Trainer:
                     train=train_point,
                     num_users=num_users,
                     num_items=num_items,
-                    propensity=self.propensity
+                    propensity=self.propensity,
+                    seed=seed
                 )
             elif self.model_name == "ip":
                 u_emb, i_emb = train_ip(num_users=num_users, 
@@ -435,6 +461,9 @@ class Trainer:
                                         scores=pscore, 
                                         propensity=self.propensity, 
                                         data=self.data)
+                
+            elif self.model_name == "ngcf":
+                u_emb, i_emb = train_ngcf(self.data)
 
             result = aoa_evaluator(
                 user_embed=u_emb,

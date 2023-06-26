@@ -4,8 +4,9 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --partition=fat_soil_shared
 #SBATCH --time=04:00:00
-#SBATCH --output=env.out
-#SBATCH --error=env.err
+#SBATCH --output=create.out
+#SBATCH --error=create.err
+
 
 module purge
 module load 2021

@@ -7,6 +7,7 @@
 #SBATCH --output=preprocess.out
 #SBATCH --error=preprocess.err
 
+
 module purge
 module load 2021
 module load Anaconda3/2021.05
@@ -14,4 +15,4 @@ module load Anaconda3/2021.05
 cd $HOME/recsys/src
 source activate recsys
 
-srun python preprocess_datasets.py -d yahoo -p bb-item bb-item-user
+srun python preprocess_datasets.py -d yahoo -p original bb-item bb-item-user
