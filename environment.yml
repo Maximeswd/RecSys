@@ -1,4 +1,4 @@
-name: recsys
+name: recsys_2
 channels:
   - pytorch
   - nvidia
@@ -19,6 +19,8 @@ dependencies:
   - scipy
   - pip:
     - tensorflow-gpu==1.15.2
+    - statsmodels==0.14
+    
 
 
 
