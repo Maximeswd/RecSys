@@ -17,6 +17,7 @@ dependencies:
   - cudatoolkit=10.0
   - cudnn=7.6
   - scipy
+  - itertools
   - pip:
     - tensorflow-gpu==1.15.2
     - statsmodels==0.14
