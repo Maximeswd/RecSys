@@ -18,7 +18,7 @@ parser.add_argument('--data', '-d', type=str, required=True, choices=['coat', 'y
 parser.add_argument('--pointwise_loss', type=str, help='Pointwise loss function to use', required=True)
 parser.add_argument('--pairwise_loss', type=str, help='Pairwise loss function to use', required=True)
 parser.add_argument('--propensity', '-p', type=str, required=True, choices=['original', 'bb-item', 'bb-item-user'])
-
+parser.add_argument('--hyper_params_type', type=str, help='Hyperparams to use', required=True, choices=['default', 'tuned'])
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
@@ -34,7 +34,8 @@ if __name__ == "__main__":
         model_name=args.model_name,
         pointwise_loss=args.pointwise_loss,
         pairwise_loss=args.pairwise_loss,
-        propensity=args.propensity
+        propensity=args.propensity,
+        hyper_params_type=args.hyper_params_type
         )
     trainer.run(num_sims=args.run_sims)
 

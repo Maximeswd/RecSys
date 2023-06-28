@@ -16,5 +16,5 @@ module load Anaconda3/2021.05
 cd $HOME/recsys/src
 source activate recsys
 
-srun python run.py -d  yahoo -m wmf expomf relmf bpr ubpr ip --pointwise_loss original --pairwise_loss original -r 10 -p original bb-item bb-item-user
-srun python run.py -d  yahoo -m dumf dubpr --pointwise_loss dual_unbiased --pairwise_loss dual_unbiased -r 10 -p original bb-item bb-item-user
+srun python run.py -d  yahoo -m wmf expomf relmf bpr ubpr ip --pointwise_loss original --pairwise_loss original -r 10 -p original bb-item bb-item-user --hyper_params_type tuned
+srun python run.py -d  yahoo -m dumf dubpr --pointwise_loss dual_unbiased --pairwise_loss dual_unbiased -r 10 -p original bb-item bb-item-user --hyper_params_type tuned

@@ -362,6 +362,31 @@ class NGCF(object):
 
         return mf_loss, emb_loss, reg_loss
 
+    def create_ubpr_loss(self, users, pos_items, neg_items):
+        pos_scores = tf.reduce_sum(tf.multiply(users, pos_items), axis=1)
+        neg_scores = tf.reduce_sum(tf.multiply(users, neg_items), axis=1)
+
+        regularizer = (
+            tf.nn.l2_loss(users) + tf.nn.l2_loss(pos_items) + tf.nn.l2_loss(neg_items)
+        )
+        regularizer = regularizer / self.batch_size
+
+        # In the first version, we implement the bpr loss via the following codes:
+        # We report the performance in our paper using this implementation.
+        maxi = tf.log(tf.nn.sigmoid(pos_scores - neg_scores))
+        mf_loss = tf.negative(tf.reduce_mean(maxi))
+
+        ## In the second version, we implement the bpr loss via the following codes to avoid 'NAN' loss during training:
+        ## However, it will change the training performance and training performance.
+        ## Please retrain the model and do a grid search for the best experimental setting.
+        # mf_loss = tf.reduce_sum(tf.nn.softplus(-(pos_scores - neg_scores)))
+
+        emb_loss = self.decay * regularizer
+
+        reg_loss = tf.constant(0.0, tf.float32, [1])
+
+        return mf_loss, emb_loss, reg_loss
+
     def _convert_sp_mat_to_sp_tensor(self, X):
         coo = X.tocoo().astype(np.float32)
         indices = np.mat([coo.row, coo.col]).transpose()
@@ -643,113 +668,6 @@ def train(
                     reg_loss,
                 )
                 print(perf_str)
-    #         continue
-
-    #     t2 = time()
-    #     users_to_test = list(data_generator.test_set.keys())
-    #     ret = test(
-    #         sess,
-    #         model,
-    #         users_to_test,
-    #         data_generator=data_generator,
-    #         args=args,
-    #         drop_flag=True,
-    #     )
-
-    #     t3 = time()
-
-    #     loss_loger.append(loss)
-    #     rec_loger.append(ret["recall"])
-    #     pre_loger.append(ret["precision"])
-    #     ndcg_loger.append(ret["ndcg"])
-    #     hit_loger.append(ret["hit_ratio"])
-
-    #     if args.verbose > 0:
-    #         perf_str = (
-    #             "Epoch %d [%.1fs + %.1fs]: train==[%.5f=%.5f + %.5f + %.5f], recall=[%.5f, %.5f], "
-    #             "precision=[%.5f, %.5f], hit=[%.5f, %.5f], ndcg=[%.5f, %.5f]"
-    #             % (
-    #                 epoch,
-    #                 t2 - t1,
-    #                 t3 - t2,
-    #                 loss,
-    #                 mf_loss,
-    #                 emb_loss,
-    #                 reg_loss,
-    #                 ret["recall"][0],
-    #                 ret["recall"][-1],
-    #                 ret["precision"][0],
-    #                 ret["precision"][-1],
-    #                 ret["hit_ratio"][0],
-    #                 ret["hit_ratio"][-1],
-    #                 ret["ndcg"][0],
-    #                 ret["ndcg"][-1],
-    #             )
-    #         )
-    #         print(perf_str)
-
-    #     cur_best_pre_0, stopping_step, should_stop = early_stopping(
-    #         ret["recall"][0],
-    #         cur_best_pre_0,
-    #         stopping_step,
-    #         expected_order="acc",
-    #         flag_step=5,
-    #     )
-
-    #     # *********************************************************
-    #     # early stopping when cur_best_pre_0 is decreasing for ten successive steps.
-    #     if should_stop == True:
-    #         break
-
-    #     # *********************************************************
-    #     # save the user & item embeddings for pretraining.
-    #     if ret["recall"][0] == cur_best_pre_0 and args.save_flag == 1:
-    #         save_saver.save(sess, weights_save_path + "/weights", global_step=epoch)
-    #         print("save the weights in path: ", weights_save_path)
-
-    # recs = np.array(rec_loger)
-    # pres = np.array(pre_loger)
-    # ndcgs = np.array(ndcg_loger)
-    # hit = np.array(hit_loger)
-
-    # best_rec_0 = max(recs[:, 0])
-    # idx = list(recs[:, 0]).index(best_rec_0)
-
-    # final_perf = (
-    #     "Best Iter=[%d]@[%.1f]\trecall=[%s], precision=[%s], hit=[%s], ndcg=[%s]"
-    #     % (
-    #         idx,
-    #         time() - t0,
-    #         "\t".join(["%.5f" % r for r in recs[idx]]),
-    #         "\t".join(["%.5f" % r for r in pres[idx]]),
-    #         "\t".join(["%.5f" % r for r in hit[idx]]),
-    #         "\t".join(["%.5f" % r for r in ndcgs[idx]]),
-    #     )
-    # )
-    # print(final_perf)
-
-    # save_path = "%soutput/%s/%s.result" % (
-    #     args.proj_path,
-    #     args.dataset,
-    #     model.model_type,
-    # )
-    # ensureDir(save_path)
-    # f = open(save_path, "a")
-
-    # f.write(
-    #     "embed_size=%d, lr=%.4f, layer_size=%s, node_dropout=%s, mess_dropout=%s, regs=%s, adj_type=%s\n\t%s\n"
-    #     % (
-    #         args.embed_size,
-    #         args.lr,
-    #         args.layer_size,
-    #         args.node_dropout,
-    #         args.mess_dropout,
-    #         args.regs,
-    #         args.adj_type,
-    #         final_perf,
-    #     )
-    # )
-    # f.close()
     
     return sess.run([model.ua_embeddings, model.ia_embeddings],
     feed_dict={model.users: users,
