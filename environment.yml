@@ -18,6 +18,7 @@ dependencies:
   - cudnn=7.6
   - scipy
   - itertools
+  - plotly
   - pip:
     - tensorflow-gpu==1.15.2
     - statsmodels==0.14

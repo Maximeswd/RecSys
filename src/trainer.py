@@ -4,7 +4,7 @@ in the paper "Unbiased Pairwise Learning from Biased Implicit Feedback".
 """
 import yaml
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, Dict
 
 import pandas as pd
 import numpy as np
@@ -326,6 +326,21 @@ def train_pairwise(
 
     return u_emb, i_emb, val_loss
 
+def load_hyper_params(data: str, model_name: str, type: str = 'default', propensity: str = None) -> Dict:
+    print(f"Using {type} hyperparameters for {propensity}/{data}/{model_name}")
+    default_hyper_params = yaml.safe_load(open(f"../conf/hyper_params.yaml", "r"))
+    if type == 'default':
+         return default_hyper_params[data][model_name]
+    else:
+       if propensity is None:
+           raise AttributeError(f"Propensity type is required.")
+       tuned_hyper_params = yaml.safe_load(open(f"../conf/{propensity}_hyper_params.yaml", "r"))
+       if data in tuned_hyper_params and model_name in tuned_hyper_params[data]:
+           return tuned_hyper_params[data][model_name]
+       else:
+           print(f"Could not find tuned hyperparameters for {propensity}/{data}/{model_name}. Using defaults")
+           return default_hyper_params[data][model_name]
+    
 
 class Trainer:
 
@@ -344,17 +359,15 @@ class Trainer:
         eta: float = 0.1,
         model_name: str = "bpr",
         propensity: str = 'original',
+        hyper_params_type: str = 'default'
     ) -> None:
         """Initialize class."""
         self.data = data
         self.pointwise_loss = pointwise_loss
         self.pairwise_loss = pairwise_loss
         self.propensity = propensity
-
         if model_name not in ["expomf", "ip", "ngcf"]:
-            hyper_params = yaml.safe_load(open(f"../conf/hyper_params.yaml", "r"))[
-                data
-            ][model_name]
+            hyper_params = load_hyper_params(data=data, model_name=model_name, type=hyper_params_type, propensity=propensity)
             self.dim = np.int(hyper_params["dim"])
             self.lam = hyper_params["lam"]
             self.weight = hyper_params["weight"] if model_name == "wmf" else 1.0

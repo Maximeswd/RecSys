@@ -222,17 +222,17 @@ def preprocess_dataset(data: str, propensity: str):
     # Estimate propensities and user-item frequencies.
     if data == 'yahoo':
         if propensity == 'bb-item':
-            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] 
+            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
             item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
             pscore = bayesian_BB(train, num_users, num_items, kind='item_est')
             nscore = 1 - pscore
         elif propensity == 'bb-item-user':
-            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] 
+            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns the total number of clicks per user, len = 15229 (which should be 15400)
             item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
             pscore = bayesian_BB(train, num_users, num_items, kind='combi')
             nscore = 1 - pscore
         elif propensity == 'original':
-            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] 
+            user_freq = np.unique(train[train[:, 2] == 1, 0], return_counts=True)[1] # this returns len = 15229 (which should be 15400 I would say)
             item_freq = np.unique(train[train[:, 2] == 1, 1], return_counts=True)[1]
             pscore = (item_freq / item_freq.max()) ** 0.5
             nscore = 1 - pscore
@@ -246,12 +246,6 @@ def preprocess_dataset(data: str, propensity: str):
         elif propensity == 'bb-item-user':
             pscore = bayesian_BB(train, num_users, num_items, kind='combi')
             nscore = 1 - pscore
-        # elif propensity == 'original':
-        #     matrix = sparse.lil_matrix((num_users, num_items))
-        #     for (u, i) in train[:, :2]:
-        #         matrix[u, i] = 1
-        #     pscore = np.clip(np.array(matrix.mean(axis=0)).flatten() ** 0.5, a_max=1.0, a_min=1e-6)
-        #     nscore = 1 - pscore
         elif propensity == 'original':
             matrix = sparse.lil_matrix((num_users, num_items))
             for (u, i, y) in train:
