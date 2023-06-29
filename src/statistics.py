@@ -14,7 +14,7 @@ from itertools import combinations
 
 def load_data(logs_folder):
     dfs = []
-    methods = ['wmf', 'expomf', 'relmf', 'bpr', 'ubpr', 'dumf', 'dubpr']
+    methods = ['bpr', 'ubpr']
     propensities = ['original', 'bb-item-user']
 
     for propensity in propensities:
@@ -28,7 +28,7 @@ def load_data(logs_folder):
     return dfs
 
 def prepare_data(df):
-    methods = ['relmf', 'bpr', 'ubpr', 'dumf', 'dubpr']
+    methods = ['bpr', 'ubpr']
     propensities = ['original', 'bb-item-user']
     df_prepared = pd.DataFrame()
     df.rename(columns={'Unnamed: 0': 'metric'}, inplace=True)
@@ -62,7 +62,7 @@ def manova_test_method(df):
     print(manova.mv_test())
 
 def manova_test_prop(df):
-    methods = ['relmf', 'bpr', 'ubpr', 'dumf', 'dubpr']
+    methods = ['bpr', 'ubpr']
     for method in methods: 
         print(f'MANOVA for method {method}')
         df_method = df[df['method'] == method]
