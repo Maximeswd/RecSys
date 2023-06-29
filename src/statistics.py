@@ -3,7 +3,8 @@ This script is made to run the statistical comparison of methods and propensity 
 Unbiased Pairwise Learning from Biased Implicit Feedback
 Made by Ilse Feenstra, Maxime Dassen and Abijith Chintam
 """
-
+import argparse
+import warnings
 import os
 import pandas as pd
 from statsmodels.multivariate.manova import MANOVA
@@ -12,24 +13,38 @@ from statsmodels.formula.api import ols
 from statsmodels.stats.multicomp import pairwise_tukeyhsd, MultiComparison
 from itertools import combinations
 
-def load_data(logs_folder):
+parser = argparse.ArgumentParser()
+parser.add_argument('--datasets', '-d', nargs='+', type=str, required=True, choices=['coat', 'yahoo'])
+parser.add_argument('--propensity', '-p', nargs='+', type=str, required=True, choices=['original', 'bb-item-user'])
+parser.add_argument('--methods', '-m', nargs='+', type=str, required=True, choices=['wmf', 'relmf', 'bpr', 'ubpr', 'dumf', 'dubpr']) # ip and expomf are not included because they don't work with the MANOVA test since all iterations are the same
+parser.add_argument('--comparison', '-c', nargs=1, help='parse one comparison at the time', type=str, required=True, choices=['method', 'prop'])
+
+def load_data(logs_folder, methods):
+    """ This function loads the right data """
+    
     dfs = []
-    methods = ['bpr', 'ubpr']
     propensities = ['original', 'bb-item-user']
+
+    if not isinstance(propensities, list):
+        propensities == ['original']
+        print(propensities[0])
 
     for propensity in propensities:
         for method in methods:
             file_path = os.path.join(logs_folder, propensity, method, "results/aoa_all.csv")
+            print(file_path)
+
             if os.path.isfile(file_path):
                 df = pd.read_csv(file_path)
                 df['method'] = method
                 df['prop'] = propensity
                 dfs.append(df)
+    
     return dfs
 
-def prepare_data(df):
-    methods = ['bpr', 'ubpr']
-    propensities = ['original', 'bb-item-user']
+
+def prepare_data(df, methods):
+    """ This function turns the data into the right format for the MANOVA analysis """
     df_prepared = pd.DataFrame()
     df.rename(columns={'Unnamed: 0': 'metric'}, inplace=True)
     df['metric'] = df['metric'].str.replace('@', '_')
@@ -57,12 +72,17 @@ def prepare_data(df):
 
 
 def manova_test_method(df):
+    """ This function performs the MANOVA test between methods per dataset per propensity estimation """
+    
     df_wide = df.pivot_table(index=['method', 'iteration'], columns='metric', values='value').reset_index()
     manova = MANOVA.from_formula('DCG_3 + Recall_3 + MAP_3 + DCG_5 + Recall_5 + MAP_5 + DCG_8 + Recall_8 + MAP_8 ~ method', data=df_wide)
     print(manova.mv_test())
 
 def manova_test_prop(df):
+    """ This function performs the the MANOVA test between propensity estimations per dataset per method """
+    
     methods = ['bpr', 'ubpr']
+
     for method in methods: 
         print(f'MANOVA for method {method}')
         df_method = df[df['method'] == method]
@@ -73,12 +93,17 @@ def manova_test_prop(df):
         print(manova.mv_test())
 
 def post_hoc_test_methods(df_prepared):
+    """ This function performs the Tukey HSD test and does a pairwise comparison between methods """
+    
     methods = df_prepared['method'].unique()
     metrics = df_prepared['metric'].unique()
 
     results = []
+
     for metric in metrics:
+
         df_metric = df_prepared[df_prepared['metric'] == metric]
+
         for method1, method2 in combinations(methods, 2):
             df_pair = df_metric[(df_metric['method'] == method1) | (df_metric['method'] == method2)]
             model = ols('value ~ C(method)', data=df_pair).fit()
@@ -87,17 +112,20 @@ def post_hoc_test_methods(df_prepared):
             results.append([metric, method1, method2, p_value])
 
     df_results = pd.DataFrame(results, columns=['metric', 'method1', 'method2', 'p_value'])
-    df_results['significant'] = df_results['p_value'] < 0.05  # or apply the Bonferroni correction here
+    df_results['significant'] = df_results['p_value'] < 0.05  
     print(df_results)
 
-    # If you want to perform Tukey's HSD test for each metric
+    
     for metric in metrics:
-        print(f'Posthoc for metric: {metric}')
+
+        print(f"Tukey's HSD for {metric}")
         df_metric = df_prepared[df_prepared['metric'] == metric]
         posthoc = pairwise_tukeyhsd(df_metric['value'], df_metric['method'], alpha=0.05)
         print(posthoc)
 
 def post_hoc_test_prop(df_prepared):
+    """ This function performs the Tukey HSD test and does a pairwise comparison between propensity estimations """
+
     methods = df_prepared['method'].unique()
     metrics = df_prepared['metric'].unique()
     results = []
@@ -107,7 +135,7 @@ def post_hoc_test_prop(df_prepared):
     
             df_method_metric = df_prepared[(df_prepared['method'] == method) & (df_prepared['metric'] == metric)]
 
-            # Specify propensity estimations to compare
+            # Propensity estimations to compare
             prop1 = 'original'
             prop2 = 'bb-item-user'
             
@@ -121,28 +149,44 @@ def post_hoc_test_prop(df_prepared):
     df_results['significant'] = df_results['p_value'] < 0.05  # or apply the Bonferroni correction here
     print(df_results)
 
-    # Perform Tukey's HSD test for each method-metric pair
     for method in methods:
+
         for metric in metrics:
             df_method_metric = df_prepared[(df_prepared['method'] == method) & (df_prepared['metric'] == metric)]
             posthoc = pairwise_tukeyhsd(df_method_metric['value'], df_method_metric['prop'], alpha=0.05)
             print(f"Tukey's HSD for {method} - {metric}:")
             print(posthoc)
 
-def main():
-    # Adjust folder to desired dataset 
-    logs_folder = 'logs/coat/'
-    dfs = load_data(logs_folder)
+def main(dataset, methods, comparison):
+    
+    logs_folder = f'../logs/{dataset}/'
+    dfs = load_data(logs_folder, methods)
     df_concat = pd.concat(dfs)
 
-    # Prepare the DataFrame for the MANOVA analysis
-    df_prepared = prepare_data(df_concat)
-    #manova_test_method(df_prepared)
-    manova_test_prop(df_prepared)
+    
+    df_prepared = prepare_data(df_concat, methods)
 
-    # Choose which test to perform
-    #post_hoc_test_methods(df_prepared)
-    post_hoc_test_prop(df_prepared)
+    if 'method' in comparison:
+        manova_test_method(df_prepared)
+        post_hoc_test_methods(df_prepared)
+    
+    elif 'prop' in comparison:
 
-if __name__ == '__main__':
-    main()
+        manova_test_prop(df_prepared)
+        post_hoc_test_prop(df_prepared)
+
+if __name__ == "__main__":
+
+    warnings.filterwarnings("ignore")
+    args = parser.parse_args()
+
+    comparison = args.comparison
+    
+    for data in args.datasets:
+
+        if 'method' in comparison:
+            for propensity in args.propensity:
+                main(data, args.methods, comparison)
+
+        elif 'prop' in comparison:
+            main(data, args.methods, comparison)
