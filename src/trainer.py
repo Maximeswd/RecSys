@@ -18,8 +18,8 @@ from models.ngcf import train
 from models.recommenders import PairwiseRecommender, PointwiseRecommender
 
 
-def train_ngcf(data: str, seed) -> Tuple:
-    data_path = f"../data/{data}/ngcf/"
+def train_ngcf(data: str, propensity: str, theta=None) -> Tuple:
+    data_path = f"../data/{data}/{propensity}/ngcf"
     return train(
         data_path=data_path,
         regs="[1e-5]",
@@ -27,10 +27,12 @@ def train_ngcf(data: str, seed) -> Tuple:
         layer_size="[64, 64, 64]",
         lr=0.0001,
         batch_size=128,
-        epoch=500,
+        epoch=1000,
         verbose=1,
         node_dropout="[0.1]",
         mess_dropout="[0.1, 0.1, 0.1]",
+        loss_function="UBPR",
+        theta=theta
     )
 
 def train_ip(num_users: int, num_items: int, scores: np.ndarray, propensity:str, data:str) -> Tuple:
@@ -473,7 +475,7 @@ class Trainer:
                                         data=self.data)
                 
             elif self.model_name == "ngcf":
-                u_emb, i_emb = train_ngcf(self.data)
+                u_emb, i_emb = train_ngcf(self.data, self.propensity, theta=pscore)
 
             result = aoa_evaluator(
                 user_embed=u_emb,
