@@ -1,3 +1,9 @@
+"""
+This script is made to run the statistical comparison of methods and propensity estimation of the paper: A Replication Study: 
+Unbiased Pairwise Learning from Biased Implicit Feedback
+Made by Ilse Feenstra, Maxime Dassen and Abijith Chintam
+"""
+
 import os
 import pandas as pd
 from statsmodels.multivariate.manova import MANOVA
@@ -22,14 +28,11 @@ def load_data(logs_folder):
     return dfs
 
 def prepare_data(df):
-    methods = ['wmf', 'expomf', 'relmf', 'bpr', 'ubpr', 'dumf', 'dubpr']
+    methods = ['relmf', 'bpr', 'ubpr', 'dumf', 'dubpr']
     propensities = ['original', 'bb-item-user']
     df_prepared = pd.DataFrame()
     df.rename(columns={'Unnamed: 0': 'metric'}, inplace=True)
     df['metric'] = df['metric'].str.replace('@', '_')
-    #df_prepared = []
-
-    
 
     for method in methods:
         # Define the columns associated with the method
@@ -59,7 +62,7 @@ def manova_test_method(df):
     print(manova.mv_test())
 
 def manova_test_prop(df):
-    methods = ['wmf', 'relmf', 'bpr', 'ubpr', 'dumf', 'dubpr']
+    methods = ['relmf', 'bpr', 'ubpr', 'dumf', 'dubpr']
     for method in methods: 
         print(f'MANOVA for method {method}')
         df_method = df[df['method'] == method]
@@ -134,8 +137,8 @@ def main():
 
     # Prepare the DataFrame for the MANOVA analysis
     df_prepared = prepare_data(df_concat)
-    manova_test_method(df_prepared)
-    #manova_test_prop(df_prepared)
+    #manova_test_method(df_prepared)
+    manova_test_prop(df_prepared)
 
     # Choose which test to perform
     #post_hoc_test_methods(df_prepared)
