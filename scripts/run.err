@@ -1,2 +1,18 @@
-WARNING:tensorflow:From /home/lcur2421/recsys/src/trainer.py:99: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+WARNING:tensorflow:From /gpfs/home3/abhijith/recsys/src/trainer.py:116: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
 
+2023-06-30 21:31:46.776027: E tensorflow/stream_executor/cuda/cuda_driver.cc:318] failed call to cuInit: UNKNOWN ERROR (303)
+WARNING:tensorflow:From /gpfs/home3/abhijith/recsys/src/trainer.py:116: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2023-06-30 21:32:05.254304: E tensorflow/stream_executor/cuda/cuda_driver.cc:318] failed call to cuInit: UNKNOWN ERROR (303)
+WARNING:tensorflow:From /gpfs/home3/abhijith/recsys/src/trainer.py:116: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2023-06-30 21:32:23.721744: E tensorflow/stream_executor/cuda/cuda_driver.cc:318] failed call to cuInit: UNKNOWN ERROR (303)
+WARNING:tensorflow:From /gpfs/home3/abhijith/recsys/src/trainer.py:116: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2023-06-30 21:32:42.103800: E tensorflow/stream_executor/cuda/cuda_driver.cc:318] failed call to cuInit: UNKNOWN ERROR (303)
+WARNING:tensorflow:From /gpfs/home3/abhijith/recsys/src/trainer.py:116: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2023-06-30 21:33:00.228689: E tensorflow/stream_executor/cuda/cuda_driver.cc:318] failed call to cuInit: UNKNOWN ERROR (303)
+WARNING:tensorflow:From /gpfs/home3/abhijith/recsys/src/trainer.py:116: The name tf.Session is deprecated. Please use tf.compat.v1.Session instead.
+
+2023-06-30 21:33:18.712732: E tensorflow/stream_executor/cuda/cuda_driver.cc:318] failed call to cuInit: UNKNOWN ERROR (303)

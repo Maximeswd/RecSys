@@ -1,10 +1,8 @@
 #!/bin/bash
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --gpus=1
-#SBATCH --partition=fat_soil_shared
+#SBATCH --partition=thin
 #SBATCH --time=10:00:00
-#SBATCH --mem=128GB
 #SBATCH --output=run.out
 #SBATCH --error=run.err
 
@@ -17,6 +15,6 @@ cd $HOME/recsys/src
 source activate recsys
 
 
-# srun python run.py -d  yahoo -m wmf expomf relmf bpr ubpr ip --pointwise_loss original --pairwise_loss original -r 10 -p original bb-item bb-item-user --hyper_params_type tuned
-# srun python run.py -d  yahoo -m dumf dubpr --pointwise_loss dual_unbiased --pairwise_loss dual_unbiased -r 10 -p original bb-item bb-item-user --hyper_params_type tuned
-srun python run.py -d  coat -m ngcf --pointwise_loss original --pairwise_loss original -r 10 -p original --hyper_params_type tuned
+srun python run.py -d  coat -m wmf expomf relmf bpr ubpr ip --pointwise_loss original --pairwise_loss original -r 10 -p original bb-item bb-item-user --hyper_params_type tuned
+srun python run.py -d  coat -m dumf dubpr --pointwise_loss dual_unbiased --pairwise_loss dual_unbiased -r 10 -p original bb-item bb-item-user --hyper_params_type tuned
+# srun python run.py -d coat -m ngcf_ubpr ngcf_bpr --pointwise_loss original --pairwise_loss original -r 2 -p original bb-item bb-item-user --hyper_params_type tuned

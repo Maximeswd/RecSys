@@ -18,22 +18,39 @@ from models.ngcf import train
 from models.recommenders import PairwiseRecommender, PointwiseRecommender
 
 
-def train_ngcf(data: str, propensity: str, theta=None) -> Tuple:
+def train_ngcf(model_name:str, data: str, propensity: str, theta=None) -> Tuple:
     data_path = f"../data/{data}/{propensity}/ngcf"
-    return train(
-        data_path=data_path,
-        regs="[1e-5]",
-        embed_size=64,
-        layer_size="[64, 64, 64]",
-        lr=0.0001,
-        batch_size=128,
-        epoch=1000,
-        verbose=1,
-        node_dropout="[0.1]",
-        mess_dropout="[0.1, 0.1, 0.1]",
-        loss_function="UBPR",
-        theta=theta
-    )
+    if model_name == "ngcf_ubpr":
+        return train(
+            data_path=data_path,
+            regs="[1e-5]",
+            embed_size=64,
+            layer_size="[64, 64, 64]",
+            lr=0.0001,
+            batch_size=128,
+            epoch=10,
+            verbose=1,
+            node_dropout="[0.1]",
+            mess_dropout="[0.1, 0.1, 0.1]",
+            loss_function="UBPR",
+            theta=theta
+        )
+    elif model_name == "ngcf_bpr":
+        return train(
+            data_path=data_path,
+            regs="[1e-5]",
+            embed_size=64,
+            layer_size="[64, 64, 64]",
+            lr=0.0001,
+            batch_size=128,
+            epoch=10,
+            verbose=1,
+            node_dropout="[0.1]",
+            mess_dropout="[0.1, 0.1, 0.1]",
+            loss_function="BPR"
+        )
+    else:
+        raise Exception(f"Unknown {model_name} provided!")
 
 def train_ip(num_users: int, num_items: int, scores: np.ndarray, propensity:str, data:str) -> Tuple:
     """ Calculate the ItemPop"""
@@ -368,7 +385,7 @@ class Trainer:
         self.pointwise_loss = pointwise_loss
         self.pairwise_loss = pairwise_loss
         self.propensity = propensity
-        if model_name not in ["expomf", "ip", "ngcf"]:
+        if model_name not in ["expomf", "ip", "ngcf_ubpr", "ngcf_bpr"]:
             hyper_params = load_hyper_params(data=data, model_name=model_name, type=hyper_params_type, propensity=propensity)
             self.dim = np.int(hyper_params["dim"])
             self.lam = hyper_params["lam"]
@@ -474,8 +491,8 @@ class Trainer:
                                         propensity=self.propensity, 
                                         data=self.data)
                 
-            elif self.model_name == "ngcf":
-                u_emb, i_emb = train_ngcf(self.data, self.propensity, theta=pscore)
+            elif self.model_name in ["ngcf_ubpr", "ngcf_bpr"]:
+                u_emb, i_emb = train_ngcf(self.model_name,self.data, self.propensity, theta=pscore)
 
             result = aoa_evaluator(
                 user_embed=u_emb,

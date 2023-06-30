@@ -51,10 +51,25 @@ python run.py -d  coat -m dumf dubpr --pointwise_loss dual_unbiased --pairwise_l
 After running the experiments, you can summarize the results by running the following command in the `src/` directory.
 
 ```bash
-python summarize_results.py -d yahoo coat -p original bb-item bb-item-user
+python summarize_results.py -m wmf expomf relmf bpr ubpr ip dumf dubpr -d yahoo coat -p original bb-item bb-item-user
 ```
 
 Once the code is finished executing, you can find the summarized results in `./paper_results/` directory.
+
+Similarly, to reproduce the results of NGCF experiments first run the following command for original propensity
+
+```bash
+python run.py -d coat -m ngcf_ubpr ngcf_bpr --pointwise_loss original --pairwise_loss original -r 2 -p original bb-item bb-item-user --hyper_params_type tuned
+```
+
+Then summarize the results using the following command
+
+```bash
+python summarize_results.py -m wmf expomf relmf bpr ubpr ip dumf dubpr ngcf_ubpr ngcf_bpr -d coat  -p original
+```
+
+For the summarize results to work, the results for the model/data/propensity combination should be present in the logs directory.
+
 
 ### Running on cluster
 Additionally, we made scripts to make the code executable on a cluster. Redirect to 'scripts/' directory and change the srun command to the desired preprocess step as described above.
@@ -70,6 +85,9 @@ Finally, change the command after srun in summarize.job to summarize the experim
 ```bash
 sbatch summarize.job
 ```
+
+Please make sure to update the above jobs with appropriate cluster details especially the partition and gpus as available.
+Install the cpu specific environment provided if you face any difficulties to run on a gpu. 
 
 
 ### Acknowledgement

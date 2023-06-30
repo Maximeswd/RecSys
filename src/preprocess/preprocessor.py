@@ -21,6 +21,7 @@ def transform_rating(ratings: np.ndarray, eps: float = 0.1) -> np.ndarray:
     ratings = ratings - 1
     return np.round(eps + (1. - eps) * (2 ** ratings - 1) / (2 ** np.max(ratings) - 1))
 
+# Implemented by Ilse/Maxime/Abhijith
 # Define the data
 def mm_est(x, n):
     """ Estimate the parameters of a beta distribution from a binomial sample using the method of moments."""
@@ -74,7 +75,7 @@ def mm_est(x, n):
     
     return alpha, beta
 
-
+# Implemented by Ilse/Maxime/Abhijith
 def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind: str):
     
     """
@@ -175,6 +176,7 @@ def bayesian_BB(data: np.ndarray, num_users: int, num_items: int, kind: str):
         
         return BB_estimates_combi
 
+# Modified by Ilse/Maxime/Abhijith
 def preprocess_dataset(data: str, propensity: str):
     """Load and preprocess datasets."""
     np.random.seed(12345)
@@ -300,7 +302,9 @@ def preprocess_dataset(data: str, propensity: str):
     np.save(file=path_data / 'pair/dubpr_val.npy', arr=dubpr_val)
 
 
+# Implemented by Ilse/Maxime/Abhijith
 def _ngcf(data: np.ndarray) -> Tuple:
+    """Generate training data for the ngcf model."""
     def group_items_by_user(data: np.ndarray) -> pd.Series:
         df = pd.DataFrame(data, columns = ['user','item'])
         df = df.groupby('user').agg({'item': lambda x: ' '.join(map(str, x))}).reset_index()
@@ -333,7 +337,7 @@ def _bpr_test(data: np.ndarray, n_samples: int) -> np.ndarray:
 
     return ret[['user', 'item_x', 'item_y', 'gamma_x', 'gamma_y']].values
 
-
+# Implemented by Ilse/Maxime/Abhijith
 def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int, propensity: str) -> np.ndarray:
     """Generate training data for the unbiased bpr."""
 
@@ -361,7 +365,7 @@ def _ubpr(data: np.ndarray, pscore: np.ndarray, n_samples: int, propensity: str)
     return ret[['user', 'item_x', 'item_y', 'click_y', 'theta_x', 'theta_y']].values
 
 
-
+# Implemented by Ilse/Maxime/Abhijith
 def _dubpr(data: np.ndarray, pscore: np.ndarray, nscore: np.ndarray, n_samples: int, propensity: str) -> np.ndarray:
     """Generate training data for the dual unbiased bpr."""
     

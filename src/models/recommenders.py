@@ -90,7 +90,8 @@ class PointwiseRecommender(AbstractRecommender):
             reg_embeds = tf.nn.l2_loss(self.user_embeddings)
             reg_embeds += tf.nn.l2_loss(self.item_embeddings)
             self.loss = self.unbiased_loss + self.lam * reg_embeds
-    
+
+    # Implemented by Ilse/Maxime/Abhijith
     def cross_entropy_loss(self):
         """Define the cross-entropy loss function."""
         with tf.name_scope('losses'):
@@ -103,8 +104,9 @@ class PointwiseRecommender(AbstractRecommender):
             reg_embeds += tf.nn.l2_loss(self.item_embeddings)
             self.loss = self.cross_entropy + self.lam * reg_embeds
     
+    # Implemented by Ilse/Maxime/Abhijith
     def dual_unbiased_loss(self):
-        """ Define the dual unbiased loss """
+        """ This function implements the DU-MF loss as described in the paper """
         with tf.name_scope('losses'):
             pscores = tf.clip_by_value(self.pscores, clip_value_min=self.clip, clip_value_max=1.0) 
             nscores = tf.clip_by_value(self.nscores, clip_value_min=self.clip, clip_value_max=1.0) 
@@ -209,8 +211,11 @@ class PairwiseRecommender(AbstractRecommender):
             reg_embeds += tf.nn.l2_loss(self.item_embeddings)
             self.loss = self.unbiased_loss + self.lam * reg_embeds
 
+    # Implemented by Ilse/Maxime/Abhijith
     def dual_unbiased_loss(self):
-        """ """
+        """ 
+        This function implements the DUBPR loss as described in the paper.
+        """
         with tf.name_scope('losses'):
             local_losses = - self.rel1 * (1 - self.rel2) * tf.log(self.preds)
             self.ideal_loss = tf.reduce_sum(local_losses) / tf.reduce_sum(self.rel1 * (1 - self.rel2))

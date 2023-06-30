@@ -1,7 +1,7 @@
 """
 This script is made to run the statistical comparison of methods and propensity estimation of the paper: A Replication Study: 
 Unbiased Pairwise Learning from Biased Implicit Feedback
-Made by Ilse Feenstra, Maxime Dassen and Abijith Chintam
+Implemented by Ilse/Maxime/Abhijith
 """
 import argparse
 import warnings

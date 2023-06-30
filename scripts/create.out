@@ -1,0 +1,81 @@
+Collecting package metadata (repodata.json): ...working... done
+Solving environment: ...working... done
+
+Downloading and Extracting Packages
+statsmodels-0.13.5   | 10.0 MB   |            |   0% statsmodels-0.13.5   | 10.0 MB   |            |   0% statsmodels-0.13.5   | 10.0 MB   | 4          |   5% statsmodels-0.13.5   | 10.0 MB   | 9          |  10% statsmodels-0.13.5   | 10.0 MB   | ##1        |  21% statsmodels-0.13.5   | 10.0 MB   | ###9       |  40% statsmodels-0.13.5   | 10.0 MB   | #######6   |  76% statsmodels-0.13.5   | 10.0 MB   | ########## | 100% statsmodels-0.13.5   | 10.0 MB   | ########## | 100% 
+patsy-0.5.3          | 189 KB    |            |   0% patsy-0.5.3          | 189 KB    | ########## | 100% patsy-0.5.3          | 189 KB    | ########## | 100% 
+Preparing transaction: ...working... done
+Verifying transaction: ...working... done
+Executing transaction: ...working... done
+Installing pip dependencies: ...working... Ran pip subprocess with arguments:
+['/home/abhijith/.conda/envs/recsys/bin/python', '-m', 'pip', 'install', '-U', '-r', '/gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt']
+Pip subprocess output:
+Collecting tensorflow-gpu==1.15.2
+  Using cached tensorflow_gpu-1.15.2-cp37-cp37m-manylinux2010_x86_64.whl (410.9 MB)
+Collecting grpcio>=1.8.6
+  Using cached grpcio-1.56.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (5.2 MB)
+Collecting astor>=0.6.0
+  Using cached astor-0.8.1-py2.py3-none-any.whl (27 kB)
+Collecting wrapt>=1.11.1
+  Using cached wrapt-1.15.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl (75 kB)
+Requirement already satisfied: wheel>=0.26 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (0.40.0)
+Collecting tensorflow-estimator==1.15.1
+  Using cached tensorflow_estimator-1.15.1-py2.py3-none-any.whl (503 kB)
+Collecting keras-applications>=1.0.8
+  Using cached Keras_Applications-1.0.8-py3-none-any.whl (50 kB)
+Requirement already satisfied: six>=1.10.0 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (1.16.0)
+Collecting absl-py>=0.7.0
+  Using cached absl_py-1.4.0-py3-none-any.whl (126 kB)
+Collecting keras-preprocessing>=1.0.5
+  Using cached Keras_Preprocessing-1.1.2-py2.py3-none-any.whl (42 kB)
+Collecting opt-einsum>=2.3.2
+  Using cached opt_einsum-3.3.0-py3-none-any.whl (65 kB)
+Collecting tensorboard<1.16.0,>=1.15.0
+  Using cached tensorboard-1.15.0-py3-none-any.whl (3.8 MB)
+Requirement already satisfied: numpy<2.0,>=1.16.0 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (1.18.1)
+Collecting termcolor>=1.1.0
+  Using cached termcolor-2.3.0-py3-none-any.whl (6.9 kB)
+Requirement already satisfied: protobuf>=3.6.1 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (3.20.3)
+Collecting google-pasta>=0.1.6
+  Using cached google_pasta-0.2.0-py3-none-any.whl (57 kB)
+Collecting gast==0.2.2
+  Using cached gast-0.2.2-py3-none-any.whl
+Collecting h5py
+  Using cached h5py-3.8.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (4.3 MB)
+Collecting werkzeug>=0.11.15
+  Using cached Werkzeug-2.2.3-py3-none-any.whl (233 kB)
+Collecting markdown>=2.6.8
+  Using cached Markdown-3.4.3-py3-none-any.whl (93 kB)
+Requirement already satisfied: setuptools>=41.0.0 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from tensorboard<1.16.0,>=1.15.0->tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (59.8.0)
+Requirement already satisfied: importlib-metadata>=4.4 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from markdown>=2.6.8->tensorboard<1.16.0,>=1.15.0->tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (4.11.4)
+Requirement already satisfied: MarkupSafe>=2.1.1 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from werkzeug>=0.11.15->tensorboard<1.16.0,>=1.15.0->tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (2.1.1)
+Requirement already satisfied: typing-extensions>=3.6.4 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard<1.16.0,>=1.15.0->tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (4.7.0)
+Requirement already satisfied: zipp>=0.5 in /gpfs/home3/abhijith/.conda/envs/recsys/lib/python3.7/site-packages (from importlib-metadata>=4.4->markdown>=2.6.8->tensorboard<1.16.0,>=1.15.0->tensorflow-gpu==1.15.2->-r /gpfs/home3/abhijith/recsys/condaenv.ewmz5ke6.requirements.txt (line 1)) (3.15.0)
+Installing collected packages: tensorflow-estimator, wrapt, werkzeug, termcolor, opt-einsum, keras-preprocessing, h5py, grpcio, google-pasta, gast, astor, absl-py, markdown, keras-applications, tensorboard, tensorflow-gpu
+Successfully installed absl-py-1.4.0 astor-0.8.1 gast-0.2.2 google-pasta-0.2.0 grpcio-1.56.0 h5py-3.8.0 keras-applications-1.0.8 keras-preprocessing-1.1.2 markdown-3.4.3 opt-einsum-3.3.0 tensorboard-1.15.0 tensorflow-estimator-1.15.1 tensorflow-gpu-1.15.2 termcolor-2.3.0 werkzeug-2.2.3 wrapt-1.15.0
+
+done
+#
+# To activate this environment, use
+#
+#     $ conda activate recsys
+#
+# To deactivate an active environment, use
+#
+#     $ conda deactivate
+
+
+JOB STATISTICS
+==============
+Job ID: 3000407
+Cluster: snellius
+User/Group: abhijith/abhijith
+State: RUNNING
+Nodes: 1
+Cores per node: 32
+CPU Utilized: 00:00:00
+CPU Efficiency: 0.00% of 02:53:20 core-walltime
+Job Wall-clock time: 00:05:25
+Memory Utilized: 0.00 MB (estimated maximum)
+Memory Efficiency: 0.00% of 56.00 GB (1.75 GB/core)
+WARNING: Efficiency statistics may be misleading for RUNNING jobs.

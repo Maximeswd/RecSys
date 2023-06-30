@@ -1,11 +1,6 @@
 """
+The following code is a modified version of the original code from the Neural Graph Collaborative Filtering paper.
 Modified the original script from https://github.com/xiangwang1223/neural_graph_collaborative_filtering
-
-Created on Oct 10, 2018
-Tensorflow Implementation of Neural Graph Collaborative Filtering (NGCF) model in:
-Wang Xiang et al. Neural Graph Collaborative Filtering. In SIGIR 2019.
-
-@author: Xiang Wang (xiangwang@u.nus.edu)
 """
 import tensorflow as tf
 import os
@@ -20,6 +15,7 @@ from utility.batch_test import *
 
 
 class NGCF(object):
+    # Modified by Ilse/Maxime/Abhijith
     def __init__(self, data_config, pretrain_data, args, theta=None):
         # argument settings
         self.model_type = "ngcf"
@@ -379,7 +375,11 @@ class NGCF(object):
 
         return mf_loss, emb_loss, reg_loss
 
+    # Implemented by Ilse/Maxime/Abhijith
     def create_ubpr_loss(self, users, pos_items, neg_items):
+        """
+        This function calculates the UBPR loss 
+        """
         pos_scores = tf.reduce_sum(tf.multiply(users, pos_items), axis=1)
         neg_scores = tf.reduce_sum(tf.multiply(users, neg_items), axis=1)
        
@@ -436,7 +436,7 @@ def load_pretrained_data(args):
         pretrain_data = None
     return pretrain_data
 
-
+# Implemented by Ilse/Maxime/Abhijith
 def train(
     weights_path="",
     data_path="",
@@ -464,6 +464,9 @@ def train(
     loss_function='BPR',
     theta=None
 ):
+"""
+    This is the main function for training NGCF.
+"""
     print(
         "Num GPUs Available: ",
         len(tf.compat.v1.config.experimental.list_physical_devices("GPU")),

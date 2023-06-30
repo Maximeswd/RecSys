@@ -1,6 +1,5 @@
 """
-Codes for training recommenders used in the real-world experiments
-in the paper "Unbiased Pairwise Learning from Biased Implicit Feedback".
+# Implemented by Ilse/Maxime/Abhijith
 """
 import yaml
 from pathlib import Path
@@ -46,7 +45,7 @@ class Tuner:
         self.model_name = model_name
 
     def run(self, num_sims: int = 10) -> None:
-        """Train implicit recommenders."""
+        """Tuning the models based on validation loss."""
         train_point = np.load(f"../data/{self.data}/{self.propensity}/point/train.npy")
         val_point = np.load(f"../data/{self.data}/{self.propensity}/point/val.npy")
         test_point = np.load(f"../data/{self.data}/{self.propensity}/point/test.npy")

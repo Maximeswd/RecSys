@@ -1,6 +1,5 @@
 """
-Codes for running the real-world experiments
-in the paper "Unbiased Pairwise Learning from Biased Implicit Feedback".
+Implemented by Ilse/Maxime/Abhijith
 """
 import argparse
 import warnings
@@ -22,6 +21,7 @@ parser.add_argument("--datasets", "-d", nargs='+', type=str, required=True, choi
 parser.add_argument('--propensity', '-p', nargs='+', type=str, required=True, choices=['original', 'bb-item', 'bb-item-user'])
 
 
+# Implemented by Ilse/Maxime/Abhijith
 def tune(trial, model_name, data, batch_size, max_iters, eta, run_sims, propensity):
     dim = trial.suggest_int("dim", 100, 300, step=20)
     lam = trial.suggest_float("lam", 1e-7, 1e-3, log=True)

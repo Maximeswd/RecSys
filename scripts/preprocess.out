@@ -19,3 +19,17 @@ Finished Preprocessing coat for propensity method bb-item-user!
 
  ========================= 
 
+
+JOB STATISTICS
+==============
+Job ID: 3000441
+Cluster: snellius
+User/Group: abhijith/abhijith
+State: COMPLETED (exit code 0)
+Nodes: 1
+Cores per node: 96
+CPU Utilized: 00:00:06
+CPU Efficiency: 0.27% of 00:36:48 core-walltime
+Job Wall-clock time: 00:00:23
+Memory Utilized: 1.54 MB
+Memory Efficiency: 0.00% of 168.00 GB

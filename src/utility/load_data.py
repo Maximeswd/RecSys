@@ -1,9 +1,6 @@
 '''
-Created on Oct 10, 2018
-Tensorflow Implementation of Neural Graph Collaborative Filtering (NGCF) model in:
-Wang Xiang et al. Neural Graph Collaborative Filtering. In SIGIR 2019.
-
-@author: Xiang Wang (xiangwang@u.nus.edu)
+Modified by Ilse/Maxime/Abhijith
+Original source code from https://github.com/xiangwang1223/neural_graph_collaborative_filtering 
 '''
 import numpy as np
 import random as rd
@@ -185,7 +182,9 @@ class Data(object):
 
         return users, pos_items, neg_items
     
+    # Implemented by Ilse/Maxime/Abhijith
     def sample_ubpr(self):
+        """ Sample data for training NGCF model with UBPR loss"""
         if self.batch_size <= self.n_users:
             users = rd.sample(self.exist_users, self.batch_size)
         else:
