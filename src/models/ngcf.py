@@ -464,9 +464,6 @@ def train(
     loss_function='BPR',
     theta=None
 ):
-"""
-    This is the main function for training NGCF.
-"""
     print(
         "Num GPUs Available: ",
         len(tf.compat.v1.config.experimental.list_physical_devices("GPU")),
